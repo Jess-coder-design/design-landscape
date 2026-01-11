@@ -199,7 +199,7 @@ function handleKeywordClick(keyword, element) {
       console.log('Navigating to 3D landscape with keywords:', keywords);
       
       // Build URL with keyword parameters
-      const url = new URL('http://127.0.0.1:5500/3d-landscape/index.html');
+      const url = new URL('https://classy-genie-854a0e.netlify.app');
       keywords.forEach(kw => {
         url.searchParams.append('keyword', kw);
       });
@@ -393,8 +393,8 @@ async function loadKeywords() {
 
 function highlightKeywords() {
   // Don't highlight on the landscape page
-  const isLandscapePage = window.location.href.includes('127.0.0.1:5500/landscape') || 
-                          window.location.href.includes('lively-sunflower-a12fae.netlify.app');
+  const isLandscapePage = window.location.href.includes('classy-genie-854a0e.netlify.app') || 
+                          window.location.href.includes('localhost');
   
   if (isLandscapePage) {
     console.log('Skipping keyword highlighting on landscape page');
@@ -429,7 +429,8 @@ function highlightKeywords() {
     const skipTags = ['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'SCRIPT', 'STYLE', 'NOSCRIPT', 'SVG', 'IMG', 'VIDEO', 'AUDIO', 'IFRAME', 'CODE', 'PRE'];
     const skipClasses = ['goog-', 'google-', 'icon', 'btn', 'logo', 'nav'];
     
-    if (skipTags.includes(parent?.tagName) || skipClasses.some(cls => parent?.className?.includes(cls))) {
+    const parentClassName = String(parent?.className || '');
+    if (skipTags.includes(parent?.tagName) || skipClasses.some(cls => parentClassName.includes(cls))) {
       return;
     }
     
@@ -745,7 +746,7 @@ function addCritLogo() {
       console.log('   - Not in list: proceeding to add');
       
       // Send to online server (change this URL to your deployed endpoint)
-      const SERVER_URL = 'https://lively-sunflower-a12fae.netlify.app/.netlify/functions/add-url';
+      const SERVER_URL = 'https://classy-genie-854a0e.netlify.app/.netlify/functions/add-url';
       
       fetch(SERVER_URL, {
         method: 'POST',
@@ -777,7 +778,7 @@ function addCritLogo() {
 }
 
 // Add the logo when the page loads (but not on the landscape page)
-const isLandscapePage = window.location.href.includes('lively-sunflower-a12fae.netlify.app') || 
+const isLandscapePage = window.location.href.includes('classy-genie-854a0e.netlify.app') || 
                         window.location.href.includes('127.0.0.1:5500/landscape');
 if (!isLandscapePage) {
   if (document.readyState === 'loading') {
