@@ -39,11 +39,13 @@ async function connectDB() {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Get all submitted URLs
 app.get('/urls', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   try {
     const urlsCollection = db.collection('urls');
     const urls = await urlsCollection.find({}).sort({ addedAt: -1 }).toArray();
@@ -60,6 +62,10 @@ app.get('/urls', async (req, res) => {
 
 // Add URL endpoint
 app.post('/add-url', async (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
   try {
     const { url, title, description } = req.body;
 
