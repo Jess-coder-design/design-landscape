@@ -31,6 +31,22 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Get all submitted URLs
+app.get('/urls', async (req, res) => {
+  try {
+    const urlsCollection = db.collection('urls');
+    const urls = await urlsCollection.find({}).sort({ addedAt: -1 }).toArray();
+    res.json({ 
+      success: true, 
+      count: urls.length,
+      urls 
+    });
+  } catch (error) {
+    console.error('Error fetching URLs:', error);
+    res.status(500).json({ error: 'Failed to fetch URLs' });
+  }
+});
+
 // Add URL endpoint
 app.post('/add-url', async (req, res) => {
   try {
