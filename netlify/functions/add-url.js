@@ -3,7 +3,7 @@ const { MongoClient } = require('mongodb');
 const MONGO_URI = process.env.MONGODB_URI;
 
 exports.handler = async (event, context) => {
-  // CORS headers - must be present on every response
+  // Always add CORS headers to response
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -11,11 +11,16 @@ exports.handler = async (event, context) => {
     'Content-Type': 'application/json'
   };
 
-  // Handle preflight requests immediately
+  // Netlify context allows CORS bypass in newer versions
+  if (context && context.clientContext) {
+    context.clientContext.allowCors = true;
+  }
+
+  // Handle preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 204,
-      headers: headers,
+      headers,
       body: null
     };
   }
@@ -23,49 +28,51 @@ exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: headers,
-      body: JSON.stringify({ error: 'Method not allowed', success: false })
+      headers,
+      body: JSON.stringify({ error: 'Method Not Allowed' })
     };
   }
 
-  const client = new MongoClient(MONGO_URI);
-
+  let client;
   try {
-    let body = {};
-    if (event.body) {
-      body = JSON.parse(event.body);
-    }
-    
+    const body = JSON.parse(event.body || '{}');
     const { url, designKeywords, criticalKeywords } = body;
 
     if (!url) {
       return {
         statusCode: 400,
-        headers: headers,
-        body: JSON.stringify({ error: 'URL is required', success: false })
+        headers,
+        body: JSON.stringify({ 
+          error: 'URL is required',
+          success: false 
+        })
       };
     }
 
+    client = new MongoClient(MONGO_URI, { 
+      serverSelectionTimeoutMS: 5000 
+    });
+    
     await client.connect();
     const db = client.db('designpages');
-    const urlsCollection = db.collection('urls');
+    const collection = db.collection('urls');
 
     // Check if URL already exists
-    const existingUrl = await urlsCollection.findOne({ url });
-    if (existingUrl) {
+    const existing = await collection.findOne({ url });
+    if (existing) {
       await client.close();
       return {
         statusCode: 409,
-        headers: headers,
+        headers,
         body: JSON.stringify({ 
-          error: 'URL already in database',
+          error: 'URL already exists',
           success: false
         })
       };
     }
 
-    // Add new URL
-    const result = await urlsCollection.insertOne({
+    // Insert new URL
+    const result = await collection.insertOne({
       url,
       designKeywords: designKeywords || [],
       criticalKeywords: criticalKeywords || [],
@@ -73,27 +80,32 @@ exports.handler = async (event, context) => {
       source: 'chrome-extension'
     });
 
-    // Get total count
-    const totalUrls = await urlsCollection.countDocuments();
+    const count = await collection.countDocuments();
 
     await client.close();
 
     return {
-      statusCode: 200,
-      headers: headers,
+      statusCode: 201,
+      headers,
       body: JSON.stringify({
         success: true,
-        message: 'URL added successfully',
-        insertedId: result.insertedId,
-        totalUrls
+        insertedId: result.insertedId.toString(),
+        totalUrls: count,
+        message: 'URL added successfully'
       })
     };
+
   } catch (error) {
-    console.error('Error adding URL:', error);
-    await client.close();
+    console.error('Error:', error);
+    if (client) {
+      try {
+        await client.close();
+      } catch (e) {}
+    }
+    
     return {
       statusCode: 500,
-      headers: headers,
+      headers,
       body: JSON.stringify({
         error: error.message,
         success: false

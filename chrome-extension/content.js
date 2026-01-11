@@ -745,42 +745,34 @@ function addCritLogo() {
       console.log('   - Critical keywords:', keywordCheck.criticalKeywordsFound.join(', '));
       console.log('   - Not in list: proceeding to add');
       
-      // Send directly to MongoDB Atlas Data API
-      const MONGODB_API_URL = 'https://data.mongodb-api.com/app/data-gbnld/endpoint/data/v1/action/insertOne';
-      const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FjY291bnRzLm1vbmdvZGIuY29tIiwiYXVkIjoiZGF0YS5tb25nb2RiLWFwaS5jb20iLCJpYXQiOjE2NzA0NjA4MjEsImV4cCI6NjMwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwLCJ1aWQiOiI2MzhkZTljYzAzMWFlNTBmMzI1NzI0ZmYiLCJ0eXBlIjoicGF0IiwiYWxsb3dSZWFkZXJzIjp0cnVlfQ.hfOl0Z7eQ1-H6SqNIhM3F4FMg87TxWRWXxEGjL1rWnM';
+      // Send to Netlify function
+      const SERVER_URL = 'https://classy-genie-854a0e.netlify.app/.netlify/functions/add-url';
       
-      fetch(MONGODB_API_URL, {
+      fetch(SERVER_URL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'api-key': API_KEY
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          dataSource: 'Cluster0',
-          database: 'designpages',
-          collection: 'urls',
-          document: {
-            url: currentURL,
-            designKeywords: keywordCheck.designKeywordsFound,
-            criticalKeywords: keywordCheck.criticalKeywordsFound,
-            addedAt: new Date().toISOString(),
-            source: 'chrome-extension'
-          }
-        })
+          url: currentURL,
+          designKeywords: keywordCheck.designKeywordsFound,
+          criticalKeywords: keywordCheck.criticalKeywordsFound
+        }),
+        mode: 'cors'
       })
       .then(response => response.json())
       .then(data => {
-        if (data.insertedId) {
-          console.log('✓ URL saved to MongoDB! ID:', data.insertedId);
-          alert('✓ URL successfully added to the design landscape database!');
+        if (data.success) {
+          console.log('✓ URL saved! Total URLs in database:', data.totalUrls);
+          alert('✓ URL successfully added to the design landscape!\n\nTotal URLs: ' + data.totalUrls);
         } else {
           console.error('❌ Failed to save URL:', data.error);
-          alert('❌ Failed to add URL: ' + (data.error || 'Unknown error'));
+          alert('❌ Error: ' + (data.error || 'Unknown error'));
         }
       })
       .catch(error => {
-        console.error('❌ Error connecting to MongoDB:', error);
-        alert('❌ Error: ' + error.message);
+        console.error('❌ Error connecting to server:', error);
+        alert('❌ Connection error: ' + error.message);
       });
     } catch (error) {
       console.error('❌ Error checking nodes.json:', error);
