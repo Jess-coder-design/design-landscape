@@ -14,12 +14,21 @@ const corsOptions = {
   credentials: false
 };
 
-// Middleware
-app.use(cors(corsOptions));
-app.use(express.json());
+// Custom CORS middleware that ALWAYS sets headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
-// Handle preflight explicitly
-app.options('*', cors(corsOptions));
+// Middleware
+app.use(express.json());
 
 // MongoDB connection
 const MONGO_URI = process.env.MONGODB_URI;
@@ -39,13 +48,11 @@ async function connectDB() {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
 // Get all submitted URLs
 app.get('/urls', async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
   try {
     const urlsCollection = db.collection('urls');
     const urls = await urlsCollection.find({}).sort({ addedAt: -1 }).toArray();
@@ -62,10 +69,6 @@ app.get('/urls', async (req, res) => {
 
 // Add URL endpoint
 app.post('/add-url', async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
   try {
     const { url, title, description } = req.body;
 
