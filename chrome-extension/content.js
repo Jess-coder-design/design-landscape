@@ -745,33 +745,38 @@ function addCritLogo() {
       console.log('   - Critical keywords:', keywordCheck.criticalKeywordsFound.join(', '));
       console.log('   - Not in list: proceeding to add');
       
-      // Insert directly to MongoDB via Netlify function
-      const SERVER_URL = 'https://classy-genie-854a0e.netlify.app/.netlify/functions/add-url';
-      
-      fetch(SERVER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          url: currentURL,
-          designKeywords: keywordCheck.designKeywordsFound,
-          criticalKeywords: keywordCheck.criticalKeywordsFound
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          console.log('✓ URL saved! Total URLs:', data.totalUrls);
-          alert('✓ URL added to landscape database!');
+      // Submit to Render backend
+      try {
+        const response = await fetch('https://design-landscape-backend.onrender.com/add-url', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            url: currentURL,
+            title: document.title || 'Untitled',
+            description: keywordCheck.designKeywordsFound.join(', ') + ' | ' + keywordCheck.criticalKeywordsFound.join(', ')
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.status === 201) {
+          console.log('✅ URL successfully added to landscape!');
+          alert('✓ Keywords found and URL added!\n\n' +
+                'Design: ' + keywordCheck.designKeywordsFound.join(', ') + '\n' +
+                'Critical: ' + keywordCheck.criticalKeywordsFound.join(', '));
+        } else if (response.status === 409) {
+          console.log('⚠️  URL already exists in database');
+          alert('⚠️  This URL is already in the landscape!');
         } else {
-          console.error('❌ Failed:', data.error);
-          alert('❌ Error: ' + data.error);
+          console.log('❌ Failed to add URL:', result.error);
+          alert('❌ Error adding URL: ' + result.error);
         }
-      })
-      .catch(error => {
-        console.error('❌ Error:', error);
-      });
+      } catch (error) {
+        console.error('❌ Error submitting to backend:', error);
+        alert('❌ Failed to connect to backend. Check console for details.');
+      }
     } catch (error) {
       console.error('❌ Error checking nodes.json:', error);
     }
