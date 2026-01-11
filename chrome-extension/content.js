@@ -745,10 +745,11 @@ function addCritLogo() {
       console.log('   - Critical keywords:', keywordCheck.criticalKeywordsFound.join(', '));
       console.log('   - Not in list: proceeding to add');
       
-      // Send to online server (change this URL to your deployed endpoint)
+      // Send to online server using CORS proxy
       const SERVER_URL = 'https://classy-genie-854a0e.netlify.app/.netlify/functions/add-url';
+      const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
       
-      fetch(SERVER_URL, {
+      fetch(CORS_PROXY + SERVER_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
