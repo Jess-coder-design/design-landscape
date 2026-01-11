@@ -745,7 +745,7 @@ function addCritLogo() {
       console.log('   - Critical keywords:', keywordCheck.criticalKeywordsFound.join(', '));
       console.log('   - Not in list: proceeding to add');
       
-      // Send to Netlify function
+      // Insert directly to MongoDB via Netlify function
       const SERVER_URL = 'https://classy-genie-854a0e.netlify.app/.netlify/functions/add-url';
       
       fetch(SERVER_URL, {
@@ -757,22 +757,20 @@ function addCritLogo() {
           url: currentURL,
           designKeywords: keywordCheck.designKeywordsFound,
           criticalKeywords: keywordCheck.criticalKeywordsFound
-        }),
-        mode: 'cors'
+        })
       })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          console.log('✓ URL saved! Total URLs in database:', data.totalUrls);
-          alert('✓ URL successfully added to the design landscape!\n\nTotal URLs: ' + data.totalUrls);
+          console.log('✓ URL saved! Total URLs:', data.totalUrls);
+          alert('✓ URL added to landscape database!');
         } else {
-          console.error('❌ Failed to save URL:', data.error);
-          alert('❌ Error: ' + (data.error || 'Unknown error'));
+          console.error('❌ Failed:', data.error);
+          alert('❌ Error: ' + data.error);
         }
       })
       .catch(error => {
-        console.error('❌ Error connecting to server:', error);
-        alert('❌ Connection error: ' + error.message);
+        console.error('❌ Error:', error);
       });
     } catch (error) {
       console.error('❌ Error checking nodes.json:', error);
