@@ -2,42 +2,47 @@ const { MongoClient } = require('mongodb');
 
 const MONGO_URI = process.env.MONGODB_URI;
 
-// CORS headers for all responses
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Content-Type': 'application/json'
-};
+exports.handler = async (event, context) => {
+  // CORS headers - must be present on every response
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Content-Type': 'application/json'
+  };
 
-exports.handler = async (event) => {
-  // Handle preflight requests
+  // Handle preflight requests immediately
   if (event.httpMethod === 'OPTIONS') {
     return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: ''
+      statusCode: 204,
+      headers: headers,
+      body: null
     };
   }
 
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: 'Method not allowed' })
+      headers: headers,
+      body: JSON.stringify({ error: 'Method not allowed', success: false })
     };
   }
 
   const client = new MongoClient(MONGO_URI);
 
   try {
-    const { url, designKeywords, criticalKeywords } = JSON.parse(event.body);
+    let body = {};
+    if (event.body) {
+      body = JSON.parse(event.body);
+    }
+    
+    const { url, designKeywords, criticalKeywords } = body;
 
     if (!url) {
       return {
         statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'URL is required' })
+        headers: headers,
+        body: JSON.stringify({ error: 'URL is required', success: false })
       };
     }
 
@@ -50,8 +55,8 @@ exports.handler = async (event) => {
     if (existingUrl) {
       await client.close();
       return {
-        statusCode: 400,
-        headers: corsHeaders,
+        statusCode: 409,
+        headers: headers,
         body: JSON.stringify({ 
           error: 'URL already in database',
           success: false
@@ -75,7 +80,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers: corsHeaders,
+      headers: headers,
       body: JSON.stringify({
         success: true,
         message: 'URL added successfully',
@@ -85,15 +90,14 @@ exports.handler = async (event) => {
     };
   } catch (error) {
     console.error('Error adding URL:', error);
+    await client.close();
     return {
       statusCode: 500,
-      headers: corsHeaders,
+      headers: headers,
       body: JSON.stringify({
         error: error.message,
         success: false
       })
     };
-  } finally {
-    await client.close();
   }
 };
