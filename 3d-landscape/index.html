@@ -1788,6 +1788,31 @@
                                 zoomToSpecificPoints(pointsWithKeywords, keywordParams);
                             }
                         }, 500);
+                    } else {
+                        // Check localStorage for focus keyword from extension click
+                        const focusKeyword = localStorage.getItem('focusKeyword');
+                        if (focusKeyword) {
+                            console.log('📍 Focus keyword from extension:', focusKeyword);
+                            localStorage.removeItem('focusKeyword'); // Clear after reading
+                            
+                            setTimeout(() => {
+                                // Find all points containing this keyword
+                                const pointsWithKeyword = data.filter(point => {
+                                    const keywordArray = Array.isArray(point.keyword) ? point.keyword : [];
+                                    return keywordArray.some(k => k.toLowerCase() === focusKeyword.toLowerCase());
+                                });
+                                
+                                if (pointsWithKeyword.length > 0) {
+                                    console.log('🎯 Found ' + pointsWithKeyword.length + ' points with keyword: ' + focusKeyword);
+                                    zoomToSpecificPoints(pointsWithKeyword, [focusKeyword]);
+                                    
+                                    // Highlight these points by changing their material
+                                    highlightKeywordPoints(focusKeyword);
+                                } else {
+                                    console.log('⚠️  No points found with keyword:', focusKeyword);
+                                }
+                            }, 500);
+                        }
                     }
                     
                     console.log('✅ Ready!');
@@ -1850,6 +1875,64 @@
             controls.update();
             
             console.log('Zoomed extremely close to best point with ' + maxCount + ' keywords');
+        }
+
+        // Highlight points containing a specific keyword with a glow effect
+        function highlightKeywordPoints(keyword) {
+            if (!textSprites || textSprites.length === 0) {
+                console.log('No text sprites to highlight');
+                return;
+            }
+            
+            // Get the keyword's color
+            const keywordColor = keywordColors[keyword] || '#CCCCCC';
+            const hexColor = keywordColor.replace('#', '');
+            const r = parseInt(hexColor.substring(0, 2), 16);
+            const g = parseInt(hexColor.substring(2, 4), 16);
+            const b = parseInt(hexColor.substring(4, 6), 16);
+            
+            // Brighten the color (boost saturation/lightness)
+            const brightR = Math.min(r * 1.4, 255);
+            const brightG = Math.min(g * 1.4, 255);
+            const brightB = Math.min(b * 1.4, 255);
+            
+            let highlightCount = 0;
+            
+            // Update sprite visibilities and scales
+            textSprites.forEach((sprite, index) => {
+                if (index < data.length) {
+                    const point = data[index];
+                    const keywordArray = Array.isArray(point.keyword) ? point.keyword : [];
+                    const hasKeyword = keywordArray.some(k => k.toLowerCase() === keyword.toLowerCase());
+                    
+                    if (hasKeyword) {
+                        // Highlight this sprite - make it brighter and larger
+                        sprite.scale.set(5, 2.5, 1);  // Slightly larger
+                        sprite.material.opacity = 1.0;
+                        highlightCount++;
+                        
+                        // Optional: add a glow effect by increasing sprite material brightness
+                        if (sprite.material.color) {
+                            sprite.material.color.setRGB(
+                                brightR / 255,
+                                brightG / 255,
+                                brightB / 255
+                            );
+                        }
+                    } else {
+                        // Dim non-matching sprites
+                        sprite.scale.set(3.5, 1.75, 1);  // Slightly smaller
+                        sprite.material.opacity = 0.3;
+                        
+                        // Reset color to dim white
+                        if (sprite.material.color) {
+                            sprite.material.color.setRGB(0.5, 0.5, 0.5);
+                        }
+                    }
+                }
+            });
+            
+            console.log('🌟 Highlighted ' + highlightCount + ' points containing keyword: ' + keyword);
         }
 
         // Zoom camera to fitted points based on current filter

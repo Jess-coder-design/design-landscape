@@ -198,6 +198,17 @@ function handleKeywordClick(keyword, element) {
       const keywords = Array.from(clickedKeywords);
       console.log('Navigating to 3D landscape with keywords:', keywords);
       
+      // Store the selected keyword(s) in localStorage for the landscape to detect
+      if (keywords.length === 1) {
+        // Single keyword - focus on it
+        localStorage.setItem('focusKeyword', keywords[0]);
+        console.log('📍 Stored focus keyword:', keywords[0]);
+      } else if (keywords.length > 1) {
+        // Multiple keywords - use the first one as focus
+        localStorage.setItem('focusKeyword', keywords[0]);
+        console.log('📍 Stored focus keyword (first of many):', keywords[0]);
+      }
+      
       // Build URL with keyword parameters
       const url = new URL('https://classy-genie-854a0e.netlify.app');
       keywords.forEach(kw => {
