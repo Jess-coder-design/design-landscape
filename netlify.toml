@@ -1,0 +1,6 @@
+[build]
+  functions = "netlify/functions"
+  publish = "3d-landscape"
+
+[dev]
+  functions = "netlify/functions"

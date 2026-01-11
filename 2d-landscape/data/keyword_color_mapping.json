@@ -1,0 +1,702 @@
+{
+  "accountability": {
+    "hsl": "hsl(85, 95%, 55%)",
+    "hue": 85,
+    "saturation": 95,
+    "lightness": 55,
+    "count": 1
+  },
+  "agency": {
+    "hsl": "hsl(301, 71%, 51%)",
+    "hue": 301,
+    "saturation": 71,
+    "lightness": 51,
+    "count": 36
+  },
+  "alternative": {
+    "hsl": "hsl(165, 85%, 55%)",
+    "hue": 165,
+    "saturation": 85,
+    "lightness": 55,
+    "count": 52
+  },
+  "alternatives": {
+    "hsl": "hsl(326, 96%, 56%)",
+    "hue": 326,
+    "saturation": 96,
+    "lightness": 56,
+    "count": 12
+  },
+  "artefact": {
+    "hsl": "hsl(62, 72%, 52%)",
+    "hue": 62,
+    "saturation": 72,
+    "lightness": 52,
+    "count": 4
+  },
+  "artefacts": {
+    "hsl": "hsl(5, 75%, 55%)",
+    "hue": 5,
+    "saturation": 75,
+    "lightness": 55,
+    "count": 12
+  },
+  "artifact": {
+    "hsl": "hsl(186, 76%, 56%)",
+    "hue": 186,
+    "saturation": 76,
+    "lightness": 56,
+    "count": 2
+  },
+  "artifacts": {
+    "hsl": "hsl(249, 79%, 59%)",
+    "hue": 249,
+    "saturation": 79,
+    "lightness": 59,
+    "count": 6
+  },
+  "care": {
+    "hsl": "hsl(201, 91%, 51%)",
+    "hue": 201,
+    "saturation": 91,
+    "lightness": 51,
+    "count": 67
+  },
+  "careful": {
+    "hsl": "hsl(12, 82%, 62%)",
+    "hue": 12,
+    "saturation": 82,
+    "lightness": 62,
+    "count": 2
+  },
+  "carefully": {
+    "hsl": "hsl(73, 83%, 63%)",
+    "hue": 73,
+    "saturation": 83,
+    "lightness": 63,
+    "count": 12
+  },
+  "caring": {
+    "hsl": "hsl(358, 98%, 68%)",
+    "hue": 358,
+    "saturation": 98,
+    "lightness": 68,
+    "count": 4
+  },
+  "collective": {
+    "hsl": "hsl(190, 80%, 60%)",
+    "hue": 190,
+    "saturation": 80,
+    "lightness": 60,
+    "count": 122
+  },
+  "collectively": {
+    "hsl": "hsl(283, 83%, 53%)",
+    "hue": 283,
+    "saturation": 83,
+    "lightness": 53,
+    "count": 20
+  },
+  "collectivity": {
+    "hsl": "hsl(55, 95%, 65%)",
+    "hue": 55,
+    "saturation": 95,
+    "lightness": 65,
+    "count": 6
+  },
+  "communal": {
+    "hsl": "hsl(128, 78%, 58%)",
+    "hue": 128,
+    "saturation": 78,
+    "lightness": 58,
+    "count": 9
+  },
+  "communities": {
+    "hsl": "hsl(95, 75%, 65%)",
+    "hue": 95,
+    "saturation": 75,
+    "lightness": 65,
+    "count": 36
+  },
+  "community": {
+    "hsl": "hsl(329, 99%, 59%)",
+    "hue": 329,
+    "saturation": 99,
+    "lightness": 59,
+    "count": 120
+  },
+  "context": {
+    "hsl": "hsl(167, 87%, 57%)",
+    "hue": 167,
+    "saturation": 87,
+    "lightness": 57,
+    "count": 132
+  },
+  "contextual": {
+    "hsl": "hsl(129, 79%, 59%)",
+    "hue": 129,
+    "saturation": 79,
+    "lightness": 59,
+    "count": 44
+  },
+  "contextually": {
+    "hsl": "hsl(222, 82%, 52%)",
+    "hue": 222,
+    "saturation": 82,
+    "lightness": 52,
+    "count": 1
+  },
+  "critical": {
+    "hsl": "hsl(335, 75%, 65%)",
+    "hue": 335,
+    "saturation": 75,
+    "lightness": 65,
+    "count": 227
+  },
+  "criticality": {
+    "hsl": "hsl(127, 77%, 57%)",
+    "hue": 127,
+    "saturation": 77,
+    "lightness": 57,
+    "count": 5
+  },
+  "critically": {
+    "hsl": "hsl(308, 78%, 58%)",
+    "hue": 308,
+    "saturation": 78,
+    "lightness": 58,
+    "count": 40
+  },
+  "critique": {
+    "hsl": "hsl(2, 72%, 52%)",
+    "hue": 2,
+    "saturation": 72,
+    "lightness": 52,
+    "count": 24
+  },
+  "critiqued": {
+    "hsl": "hsl(178, 98%, 68%)",
+    "hue": 178,
+    "saturation": 98,
+    "lightness": 68,
+    "count": 2
+  },
+  "critiques": {
+    "hsl": "hsl(193, 83%, 63%)",
+    "hue": 193,
+    "saturation": 83,
+    "lightness": 63,
+    "count": 6
+  },
+  "daily": {
+    "hsl": "hsl(201, 91%, 51%)",
+    "hue": 201,
+    "saturation": 91,
+    "lightness": 51,
+    "count": 33
+  },
+  "design fiction": {
+    "hsl": "hsl(322, 92%, 52%)",
+    "hue": 322,
+    "saturation": 92,
+    "lightness": 52,
+    "count": 2
+  },
+  "distributed": {
+    "hsl": "hsl(35, 75%, 65%)",
+    "hue": 35,
+    "saturation": 75,
+    "lightness": 65,
+    "count": 22
+  },
+  "distribution": {
+    "hsl": "hsl(196, 86%, 66%)",
+    "hue": 196,
+    "saturation": 86,
+    "lightness": 66,
+    "count": 12
+  },
+  "embedded": {
+    "hsl": "hsl(290, 90%, 60%)",
+    "hue": 290,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 18
+  },
+  "embedding": {
+    "hsl": "hsl(87, 97%, 57%)",
+    "hue": 87,
+    "saturation": 97,
+    "lightness": 57,
+    "count": 2
+  },
+  "empower": {
+    "hsl": "hsl(341, 81%, 51%)",
+    "hue": 341,
+    "saturation": 81,
+    "lightness": 51,
+    "count": 4
+  },
+  "empowering": {
+    "hsl": "hsl(253, 83%, 63%)",
+    "hue": 253,
+    "saturation": 83,
+    "lightness": 63,
+    "count": 4
+  },
+  "empowerment": {
+    "hsl": "hsl(275, 75%, 65%)",
+    "hue": 275,
+    "saturation": 75,
+    "lightness": 65,
+    "count": 5
+  },
+  "ethical": {
+    "hsl": "hsl(334, 74%, 64%)",
+    "hue": 334,
+    "saturation": 74,
+    "lightness": 64,
+    "count": 13
+  },
+  "ethics": {
+    "hsl": "hsl(280, 80%, 50%)",
+    "hue": 280,
+    "saturation": 80,
+    "lightness": 50,
+    "count": 11
+  },
+  "everyday": {
+    "hsl": "hsl(201, 91%, 51%)",
+    "hue": 201,
+    "saturation": 91,
+    "lightness": 51,
+    "count": 44
+  },
+  "friction": {
+    "hsl": "hsl(170, 90%, 60%)",
+    "hue": 170,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 4
+  },
+  "frictions": {
+    "hsl": "hsl(265, 95%, 55%)",
+    "hue": 265,
+    "saturation": 95,
+    "lightness": 55,
+    "count": 2
+  },
+  "historical": {
+    "hsl": "hsl(98, 78%, 68%)",
+    "hue": 98,
+    "saturation": 78,
+    "lightness": 68,
+    "count": 34
+  },
+  "historically": {
+    "hsl": "hsl(71, 81%, 61%)",
+    "hue": 71,
+    "saturation": 81,
+    "lightness": 61,
+    "count": 6
+  },
+  "history": {
+    "hsl": "hsl(44, 84%, 54%)",
+    "hue": 44,
+    "saturation": 84,
+    "lightness": 54,
+    "count": 84
+  },
+  "ideological": {
+    "hsl": "hsl(356, 96%, 66%)",
+    "hue": 356,
+    "saturation": 96,
+    "lightness": 66,
+    "count": 10
+  },
+  "ideologies": {
+    "hsl": "hsl(112, 92%, 62%)",
+    "hue": 112,
+    "saturation": 92,
+    "lightness": 62,
+    "count": 8
+  },
+  "ideology": {
+    "hsl": "hsl(2, 72%, 52%)",
+    "hue": 2,
+    "saturation": 72,
+    "lightness": 52,
+    "count": 4
+  },
+  "interrogate": {
+    "hsl": "hsl(196, 86%, 66%)",
+    "hue": 196,
+    "saturation": 86,
+    "lightness": 66,
+    "count": 3
+  },
+  "interrogates": {
+    "hsl": "hsl(295, 95%, 65%)",
+    "hue": 295,
+    "saturation": 95,
+    "lightness": 65,
+    "count": 1
+  },
+  "interrogating": {
+    "hsl": "hsl(265, 95%, 55%)",
+    "hue": 265,
+    "saturation": 95,
+    "lightness": 55,
+    "count": 2
+  },
+  "interrogation": {
+    "hsl": "hsl(303, 73%, 53%)",
+    "hue": 303,
+    "saturation": 73,
+    "lightness": 53,
+    "count": 1
+  },
+  "just": {
+    "hsl": "hsl(124, 74%, 54%)",
+    "hue": 124,
+    "saturation": 74,
+    "lightness": 54,
+    "count": 61
+  },
+  "justice": {
+    "hsl": "hsl(287, 87%, 57%)",
+    "hue": 287,
+    "saturation": 87,
+    "lightness": 57,
+    "count": 17
+  },
+  "local": {
+    "hsl": "hsl(283, 83%, 53%)",
+    "hue": 283,
+    "saturation": 83,
+    "lightness": 53,
+    "count": 76
+  },
+  "locally": {
+    "hsl": "hsl(264, 94%, 54%)",
+    "hue": 264,
+    "saturation": 94,
+    "lightness": 54,
+    "count": 9
+  },
+  "made": {
+    "hsl": "hsl(317, 87%, 67%)",
+    "hue": 317,
+    "saturation": 87,
+    "lightness": 67,
+    "count": 183
+  },
+  "make": {
+    "hsl": "hsl(174, 94%, 64%)",
+    "hue": 174,
+    "saturation": 94,
+    "lightness": 64,
+    "count": 208
+  },
+  "maker": {
+    "hsl": "hsl(108, 88%, 58%)",
+    "hue": 108,
+    "saturation": 88,
+    "lightness": 58,
+    "count": 29
+  },
+  "makers": {
+    "hsl": "hsl(223, 83%, 53%)",
+    "hue": 223,
+    "saturation": 83,
+    "lightness": 53,
+    "count": 29
+  },
+  "making": {
+    "hsl": "hsl(331, 71%, 61%)",
+    "hue": 331,
+    "saturation": 71,
+    "lightness": 61,
+    "count": 223
+  },
+  "material": {
+    "hsl": "hsl(263, 93%, 53%)",
+    "hue": 263,
+    "saturation": 93,
+    "lightness": 53,
+    "count": 180
+  },
+  "materiality": {
+    "hsl": "hsl(271, 71%, 61%)",
+    "hue": 271,
+    "saturation": 71,
+    "lightness": 61,
+    "count": 20
+  },
+  "materials": {
+    "hsl": "hsl(196, 86%, 66%)",
+    "hue": 196,
+    "saturation": 86,
+    "lightness": 66,
+    "count": 123
+  },
+  "participate": {
+    "hsl": "hsl(350, 90%, 60%)",
+    "hue": 350,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 12
+  },
+  "participating": {
+    "hsl": "hsl(51, 91%, 61%)",
+    "hue": 51,
+    "saturation": 91,
+    "lightness": 61,
+    "count": 6
+  },
+  "participation": {
+    "hsl": "hsl(89, 99%, 59%)",
+    "hue": 89,
+    "saturation": 99,
+    "lightness": 59,
+    "count": 18
+  },
+  "participatory": {
+    "hsl": "hsl(199, 89%, 69%)",
+    "hue": 199,
+    "saturation": 89,
+    "lightness": 69,
+    "count": 20
+  },
+  "positional": {
+    "hsl": "hsl(332, 72%, 62%)",
+    "hue": 332,
+    "saturation": 72,
+    "lightness": 62,
+    "count": 1
+  },
+  "positionality": {
+    "hsl": "hsl(290, 90%, 60%)",
+    "hue": 290,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 1
+  },
+  "positioned": {
+    "hsl": "hsl(88, 98%, 58%)",
+    "hue": 88,
+    "saturation": 98,
+    "lightness": 58,
+    "count": 9
+  },
+  "power": {
+    "hsl": "hsl(317, 87%, 67%)",
+    "hue": 317,
+    "saturation": 87,
+    "lightness": 67,
+    "count": 81
+  },
+  "powerful": {
+    "hsl": "hsl(128, 78%, 58%)",
+    "hue": 128,
+    "saturation": 78,
+    "lightness": 58,
+    "count": 6
+  },
+  "powers": {
+    "hsl": "hsl(222, 82%, 52%)",
+    "hue": 222,
+    "saturation": 82,
+    "lightness": 52,
+    "count": 2
+  },
+  "practice-based research": {
+    "hsl": "hsl(170, 90%, 60%)",
+    "hue": 170,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 2
+  },
+  "provocative": {
+    "hsl": "hsl(64, 74%, 54%)",
+    "hue": 64,
+    "saturation": 74,
+    "lightness": 54,
+    "count": 3
+  },
+  "provoke": {
+    "hsl": "hsl(256, 86%, 66%)",
+    "hue": 256,
+    "saturation": 86,
+    "lightness": 66,
+    "count": 1
+  },
+  "provoking": {
+    "hsl": "hsl(77, 87%, 67%)",
+    "hue": 77,
+    "saturation": 87,
+    "lightness": 67,
+    "count": 3
+  },
+  "question": {
+    "hsl": "hsl(230, 90%, 60%)",
+    "hue": 230,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 71
+  },
+  "questioned": {
+    "hsl": "hsl(61, 71%, 51%)",
+    "hue": 61,
+    "saturation": 71,
+    "lightness": 51,
+    "count": 3
+  },
+  "questioning": {
+    "hsl": "hsl(84, 94%, 54%)",
+    "hue": 84,
+    "saturation": 94,
+    "lightness": 54,
+    "count": 19
+  },
+  "questions": {
+    "hsl": "hsl(173, 93%, 63%)",
+    "hue": 173,
+    "saturation": 93,
+    "lightness": 63,
+    "count": 74
+  },
+  "reflexive": {
+    "hsl": "hsl(164, 84%, 54%)",
+    "hue": 164,
+    "saturation": 84,
+    "lightness": 54,
+    "count": 53
+  },
+  "reflexivity": {
+    "hsl": "hsl(269, 99%, 59%)",
+    "hue": 269,
+    "saturation": 99,
+    "lightness": 59,
+    "count": 13
+  },
+  "reframe": {
+    "hsl": "hsl(114, 94%, 64%)",
+    "hue": 114,
+    "saturation": 94,
+    "lightness": 64,
+    "count": 5
+  },
+  "reframes": {
+    "hsl": "hsl(57, 97%, 67%)",
+    "hue": 57,
+    "saturation": 97,
+    "lightness": 67,
+    "count": 3
+  },
+  "reframing": {
+    "hsl": "hsl(239, 99%, 69%)",
+    "hue": 239,
+    "saturation": 99,
+    "lightness": 69,
+    "count": 2
+  },
+  "research through design": {
+    "hsl": "hsl(358, 98%, 68%)",
+    "hue": 358,
+    "saturation": 98,
+    "lightness": 68,
+    "count": 10
+  },
+  "responsibility": {
+    "hsl": "hsl(350, 90%, 60%)",
+    "hue": 350,
+    "saturation": 90,
+    "lightness": 60,
+    "count": 12
+  },
+  "responsible": {
+    "hsl": "hsl(174, 94%, 64%)",
+    "hue": 174,
+    "saturation": 94,
+    "lightness": 64,
+    "count": 12
+  },
+  "scenario": {
+    "hsl": "hsl(320, 90%, 50%)",
+    "hue": 320,
+    "saturation": 90,
+    "lightness": 50,
+    "count": 6
+  },
+  "scenarios": {
+    "hsl": "hsl(35, 75%, 65%)",
+    "hue": 35,
+    "saturation": 75,
+    "lightness": 65,
+    "count": 15
+  },
+  "situated": {
+    "hsl": "hsl(33, 73%, 63%)",
+    "hue": 33,
+    "saturation": 73,
+    "lightness": 63,
+    "count": 15
+  },
+  "situating": {
+    "hsl": "hsl(296, 96%, 66%)",
+    "hue": 296,
+    "saturation": 96,
+    "lightness": 66,
+    "count": 4
+  },
+  "speculate": {
+    "hsl": "hsl(296, 96%, 66%)",
+    "hue": 296,
+    "saturation": 96,
+    "lightness": 66,
+    "count": 3
+  },
+  "speculation": {
+    "hsl": "hsl(147, 97%, 57%)",
+    "hue": 147,
+    "saturation": 97,
+    "lightness": 57,
+    "count": 11
+  },
+  "speculative": {
+    "hsl": "hsl(355, 95%, 65%)",
+    "hue": 355,
+    "saturation": 95,
+    "lightness": 65,
+    "count": 64
+  },
+  "speculative design": {
+    "hsl": "hsl(355, 95%, 65%)",
+    "hue": 355,
+    "saturation": 95,
+    "lightness": 65,
+    "count": 16
+  },
+  "speculative future": {
+    "hsl": "hsl(328, 98%, 58%)",
+    "hue": 328,
+    "saturation": 98,
+    "lightness": 58,
+    "count": 2
+  },
+  "speculative futures": {
+    "hsl": "hsl(11, 81%, 61%)",
+    "hue": 11,
+    "saturation": 81,
+    "lightness": 61,
+    "count": 1
+  },
+  "worlding": {
+    "hsl": "hsl(24, 94%, 54%)",
+    "hue": 24,
+    "saturation": 94,
+    "lightness": 54,
+    "count": 1
+  }
+}

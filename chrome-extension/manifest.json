@@ -1,0 +1,32 @@
+{
+  "manifest_version": 3,
+  "name": "CSV Keyword Highlighter",
+  "version": "1.0",
+  "description": "Highlights keywords from csv2.csv on any webpage",
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "storage",
+    "downloads"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "CSV Keyword Highlighter"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["csv2.csv", "nodes_normalized.json", "designers.json", "keywords.js", "keyword_color_mapping.json", "nodes.json", "keywords_precomputed.json", "keywords_with_colors.json"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

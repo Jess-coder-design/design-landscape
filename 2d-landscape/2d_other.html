@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Landscape - UMAP</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            box-shadow: inset 0 0 40px #FF6600;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        svg { display: block; overflow: visible; }
+
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            z-index: 200;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #info-panel {
+            position: fixed;
+            background: white;
+            border: 1px solid #333;
+            padding: 12px;
+            max-width: 300px;
+            font-size: 11px;
+            z-index: 999;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: none;
+            border-radius: 4px;
+        }
+
+        #info-panel.visible { display: block; }
+        #info-panel h3 { margin: 0 0 8px 0; font-size: 13px; border-bottom: 1px solid #ccc; padding-bottom: 6px; }
+        #info-panel p { margin: 6px 0; line-height: 1.3; }
+
+        #keyword-count-panel {
+            position: fixed;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 1px solid #666;
+            padding: 8px 10px;
+            max-width: 85vw;
+            font-size: 10px;
+            z-index: 2147483646;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        #keyword-count-panel.visible { display: block; }
+        
+        .keyword-count-item {
+            display: inline-block;
+            margin: 2px 4px 2px 0;
+            padding: 2px 6px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 9px;
+        }
+        
+        .keyword-count-item .keyword-name {
+            font-weight: bold;
+            margin-right: 3px;
+        }
+        
+        .keyword-count-item .keyword-count {
+            color: #666;
+        }
+
+        a { color: #0066cc; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        .node-circle { cursor: pointer; }
+        .node-text { 
+            font-size: 10px; 
+            pointer-events: auto;
+            user-select: none; 
+            font-weight: 500;
+            text-anchor: middle;
+        }
+
+        .node-text:hover {
+            fill: black;
+            font-weight: bold;
+            text-shadow: 
+                -2px -2px 0 white,
+                2px -2px 0 white,
+                -2px 2px 0 white,
+                2px 2px 0 white,
+                -3px 0 0 white,
+                3px 0 0 white,
+                0 -3px 0 white,
+                0 3px 0 white,
+                -1px -1px 0 white,
+                1px -1px 0 white,
+                -1px 1px 0 white,
+                1px 1px 0 white,
+                -3px -3px 0 white,
+                3px -3px 0 white,
+                -3px 3px 0 white,
+                3px 3px 0 white;
+        }
+
+        .clickable-word {
+            cursor: pointer;
+            color: #666;
+            border: 1.5px solid #666;
+            border-radius: 20px;
+            padding: 2px 8px;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+            display: inline-block;
+        }
+
+        .clickable-word:hover {
+            border-color: #FF6600;
+            background-color: rgba(255, 102, 0, 0.05);
+        }
+
+        #crit-logo {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            z-index: 100;
+            pointer-events: none;
+            font-family: Arial, sans-serif;
+        }
+
+        #title {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 13px;
+            color: #666;
+            z-index: 2147483647;
+            background: white;
+            border: 1.5px solid #666;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            width: 85vw;
+        }
+
+        #title > div:first-child {
+            min-height: 18px;
+        }
+
+        #selected-area {
+            min-height: 16px;
+            display: inline;
+        }
+
+        #selected-area.drag-over {
+            background: #FFE6CC;
+            border-radius: 4px;
+            padding: 2px 4px;
+            box-shadow: inset 0 0 4px rgba(255, 102, 0, 0.3);
+        }
+
+        .selected-keyword {
+            display: inline;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: inherit;
+            color: inherit;
+            background: none;
+            border: none;
+            font-size: inherit;
+        }
+
+        .selected-keyword:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .selected-keyword::after {
+            content: '';
+        }
+
+        .selected-keyword:hover::after {
+            color: inherit;
+        }
+
+        #keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+
+        .keyword-box {
+            display: inline-block;
+            padding: 2px 6px;
+            background: white;
+            border: 1.5px solid #666;
+            border-radius: 10px;
+            font-size: 9px;
+            cursor: grab;
+            transition: all 0.2s;
+            user-select: none;
+            color: #666;
+            draggable: true;
+        }
+
+        .keyword-box:active {
+            cursor: grabbing;
+            opacity: 0.7;
+        }
+
+        .keyword-box:hover {
+            opacity: 0.8;
+            font-weight: bold;
+        }
+
+        .keyword-box.active {
+            color: white;
+            font-weight: bold;
+        }
+
+        #about-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            border: 1.5px solid #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            transition: all 0.2s ease;
+        }
+
+        #zoom-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 65px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: transparent;
+            color: #666;
+            font-size: 12px;
+            border: 1.5px solid #666;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+        }
+
+        #search-container {
+            position: fixed;
+            bottom: 25px;
+            right: 115px;
+            width: 200px;
+            background: white;
+            border: 1.5px solid #666;
+            border-radius: 4px;
+            padding: 8px;
+            display: none;
+            z-index: 99;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+
+        #search-close {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            color: #666;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-match {
+            fill: black !important;
+            font-weight: bold;
+            z-index: 10000;
+            position: relative;
+        }
+
+        .search-match tspan {
+            fill: black !important;
+            text-shadow: 
+                -2px -2px 0 white,
+                2px -2px 0 white,
+                -2px 2px 0 white,
+                2px 2px 0 white,
+                -3px 0 0 white,
+                3px 0 0 white,
+                0 -3px 0 white,
+                0 3px 0 white;
+        }
+    </style>
+</head>
+<body>
+    <svg></svg>
+    <div id="loading"></div>
+    <div id="crit-logo">CR!T</div>
+    <div id="title">
+        <div style="margin-bottom: 6px;" id="count-header">Loading...</div>
+        <div>I was wondering which sentences use <span id="selected-area">...</span></div>
+        <div id="keywords-container"></div>
+    </div>
+    <div id="zoom-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><line x1="10" y1="10" x2="14" y2="14"/></svg></div>
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search URLs...">
+        <button id="search-close">×</button>
+    </div>
+    <div id="about-btn">?</div>
+    <div id="info-panel">
+        <h3 id="panel-title"></h3>
+        <p id="panel-sentence"></p>
+        <p><a id="panel-link" target="_blank">🔗 View source</a></p>
+    </div>
+    <div id="keyword-count-panel"></div>
+
+    <script>
+        const svg = document.querySelector('svg');
+        const loading = document.getElementById('loading');
+        const infoPanel = document.getElementById('info-panel');
+        const keywordCountPanel = document.getElementById('keyword-count-panel');
+
+        let nodes = [];
+        let keywordColors = {}; // keyword -> color mapping
+        let keywordVariations = {}; // keyword -> array of variations from keywords.js
+        let keywordsAnalysis = {}; // URL -> array of found keywords from keywords_analysis.json
+        let offsetX = 0, offsetY = 0;
+        let zoom = 1;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let renderedGroups = new Map(); // id -> SVG group element
+        let allNodeTexts = [];
+        let filteredNodeIds = null; // null = show all, or Set of IDs to show
+
+        const VIEWPORT_PADDING = 300;
+
+        // Search functionality setup
+        const searchContainer = document.getElementById('search-container');
+        const searchInput = document.getElementById('search-input');
+        const searchClose = document.getElementById('search-close');
+        const zoomBtn = document.getElementById('zoom-btn');
+
+        if (zoomBtn) {
+            zoomBtn.addEventListener('click', () => {
+                if (searchContainer) {
+                    searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+                    if (searchContainer.style.display === 'block' && searchInput) {
+                        searchInput.focus();
+                        allNodeTexts = Array.from(document.querySelectorAll('.node-text'));
+                    }
+                }
+            });
+        }
+
+        if (searchClose) {
+            searchClose.addEventListener('click', () => {
+                if (searchContainer) {
+                    searchContainer.style.display = 'none';
+                }
+                if (searchInput) {
+                    searchInput.value = '';
+                    document.querySelectorAll('.search-match').forEach(text => text.classList.remove('search-match'));
+                    document.querySelectorAll('.hovered').forEach(el => el.classList.remove('hovered'));
+                }
+            });
+        }
+
+        let currentSearchTerm = '';
+
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                currentSearchTerm = e.target.value.toLowerCase().trim();
+                
+                searchTimeout = setTimeout(() => {
+                    // Get all rendered groups and search by sentence text
+                    document.querySelectorAll('[data-id]').forEach(group => {
+                        const text = group.querySelector('.node-text');
+                        
+                        if (text) {
+                            if (currentSearchTerm.length > 0 && text.textContent.toLowerCase().includes(currentSearchTerm)) {
+                                text.classList.add('search-match');
+                                group.classList.add('hovered');
+                            } else {
+                                text.classList.remove('search-match');
+                                group.classList.remove('hovered');
+                            }
+                        }
+                    });
+                }, 100);
+            });
+        }
+
+        // About button handler
+        const aboutBtn = document.getElementById('about-btn');
+        if (aboutBtn) {
+            aboutBtn.addEventListener('click', () => {
+                window.location.href = 'about.html';
+            });
+        }
+
+        // Keyword options - all available keywords to choose from
+        const allKeywords = ['critical', 'design', 'conceptual', 'analytical', 'deconstructive', 'collaborative', 'interdisciplinary', 'contextual', 'iterative', 'reflective', 'theoretical', 'evaluative', 'investigative', 'explorative', 'dialectical', 'discursive', 'reflexive', 'narrative', 'speculative', 'systemic', 'method', 'making', 'applied art', 'intention', 'plan', 'research', 'tool', 'inquiry', 'practice', 'work', 'concept', 'craft', 'exploration', 'engineering', 'shape', 'project'];
+        
+        // Category groups for special filtering
+        const designKeywords = ['design', 'method', 'making', 'applied art', 'intention', 'plan', 'research', 'tool', 'inquiry', 'practice', 'work', 'concept', 'craft', 'exploration', 'engineering', 'shape', 'project'];
+        const criticalKeywords = ['critical', 'conceptual', 'analytical', 'deconstructive', 'collaborative', 'interdisciplinary', 'contextual', 'iterative', 'reflective', 'theoretical', 'evaluative', 'investigative', 'explorative', 'dialectical', 'discursive', 'reflexive', 'narrative', 'speculative', 'systemic'];
+
+        let selectedKeywords = [];
+
+        // Setup keyword boxes
+        function setupKeywordBoxes() {
+            const container = document.getElementById('keywords-container');
+            const selectedArea = document.getElementById('selected-area');
+            container.innerHTML = '';
+            
+            allKeywords.forEach(keyword => {
+                const box = document.createElement('div');
+                box.className = 'keyword-box';
+                box.textContent = keyword;
+                box.setAttribute('data-keyword', keyword);
+                box.draggable = true;
+                
+                // Set keyword color
+                const color = keywordColors[keyword.toLowerCase()] || '#666';
+                box.style.setProperty('--keyword-color', color);
+                
+                // Drag start
+                box.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.effectAllowed = 'copy';
+                    e.dataTransfer.setData('keyword', keyword);
+                    box.style.opacity = '0.5';
+                });
+                
+                // Drag end
+                box.addEventListener('dragend', () => {
+                    box.style.opacity = '1';
+                });
+                
+                // Click to toggle
+                box.addEventListener('click', () => {
+                    selectedKeywords.push(keyword);
+                    box.classList.add('active');
+                    const color = keywordColors[keyword.toLowerCase()] || '#666';
+                    box.style.background = color;
+                    box.style.borderColor = color;
+                    updateSelectedArea();
+                    updateFiltering();
+                });
+                
+                container.appendChild(box);
+            });
+            
+            // Make selected area a drop zone
+            selectedArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                selectedArea.classList.add('drag-over');
+            });
+            
+            selectedArea.addEventListener('dragleave', () => {
+                selectedArea.classList.remove('drag-over');
+            });
+            
+            selectedArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                selectedArea.classList.remove('drag-over');
+                
+                const keyword = e.dataTransfer.getData('keyword');
+                if (keyword) {
+                    selectedKeywords.push(keyword);
+                    const box = document.querySelector(`[data-keyword="${keyword}"]`);
+                    if (box) {
+                        box.classList.add('active');
+                    }
+                    updateSelectedArea();
+                    updateFiltering();
+                }
+            });
+        }
+
+        // Remove all selected keywords when clicking outside the title area
+        document.addEventListener('click', function(e) {
+            const title = document.getElementById('title');
+            if (!title.contains(e.target)) {
+                if (selectedKeywords.length > 0) {
+                    selectedKeywords = [];
+                    // Remove all active classes and reset styles
+                    document.querySelectorAll('.keyword-box.active').forEach(box => {
+                        box.classList.remove('active');
+                        box.style.background = '';
+                        box.style.borderColor = '';
+                    });
+                    updateSelectedArea();
+                    updateFiltering();
+                }
+            }
+        });
+        
+        function updateSelectedArea() {
+            const selectedArea = document.getElementById('selected-area');
+            if (selectedKeywords.length === 0) {
+                selectedArea.innerHTML = '...';
+            } else {
+                let html = '';
+                selectedKeywords.forEach((keyword, index) => {
+                    if (index === 0) {
+                        // First word: just the word
+                        html += `<span class="selected-keyword" onclick="event.stopPropagation(); removeKeyword('${keyword}')">${keyword}</span>`;
+                    } else if (index === 1) {
+                        // Second word: ", and (word)"
+                        html += `, and <span class="selected-keyword" onclick="event.stopPropagation(); removeKeyword('${keyword}')">${keyword}</span>`;
+                    } else {
+                        // Third+ word: ", and even (word)"
+                        html += `, and even <span class="selected-keyword" onclick="event.stopPropagation(); removeKeyword('${keyword}')">${keyword}</span>`;
+                    }
+                });
+                selectedArea.innerHTML = html;
+            }
+        }
+        
+        function removeKeyword(keyword) {
+            const idx = selectedKeywords.indexOf(keyword);
+            if (idx !== -1) {
+                selectedKeywords.splice(idx, 1);
+            }
+            // Only remove 'active' if no more of this keyword remain
+            if (!selectedKeywords.includes(keyword)) {
+                const box = document.querySelector(`[data-keyword="${keyword}"]`);
+                if (box) {
+                    box.classList.remove('active');
+                    box.style.background = '';
+                    box.style.borderColor = '';
+                }
+            }
+            updateSelectedArea();
+            updateFiltering();
+        }
+        
+        function updateFiltering() {
+            if (selectedKeywords.length > 0) {
+                filterByKeywords();
+            } else {
+                filteredNodeIds = null;
+                for (let [id, group] of renderedGroups) {
+                    group.remove();
+                }
+                renderedGroups.clear();
+                
+                // Count unique URLs when showing all sentences
+                const uniqueUrls = new Set();
+                nodes.forEach(node => {
+                    if (node.url) {
+                        uniqueUrls.add(node.url);
+                    }
+                });
+                
+                const countHeader = document.getElementById('count-header');
+                if (countHeader) {
+                    countHeader.textContent = `${uniqueUrls.size} links, ${nodes.length} sentences`;
+                }
+                render();
+            }
+        }
+
+        function filterByKeywords() {
+            if (selectedKeywords.length === 0) return;
+            
+            filteredNodeIds = new Set();
+            let matchCount = 0;
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            
+            // Count required occurrences of each keyword
+            const requiredCounts = {};
+            selectedKeywords.forEach(keyword => {
+                const keywordLower = keyword.toLowerCase();
+                requiredCounts[keywordLower] = (requiredCounts[keywordLower] || 0) + 1;
+            });
+            
+            nodes.forEach((node, index) => {
+                if (!node.sample_sentence) return;
+                
+                const sentenceLower = node.sample_sentence.toLowerCase();
+                
+                // Check if ALL required keywords appear with their required counts
+                const matchesAll = Object.entries(requiredCounts).every(([keyword, requiredCount]) => {
+                    // Get all variations for this keyword from keywords.js
+                    const variations = keywordVariations[keyword] || [keyword];
+                    
+                    // Count total occurrences of all variations
+                    let totalCount = 0;
+                    variations.forEach(variation => {
+                        const regex = new RegExp('\\b' + variation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+                        const matches = sentenceLower.match(regex);
+                        totalCount += matches ? matches.length : 0;
+                    });
+                    
+                    return totalCount >= requiredCount;
+                });
+                
+                if (matchesAll) {
+                    filteredNodeIds.add(index);
+                    matchCount++;
+                    minX = Math.min(minX, node.x);
+                    maxX = Math.max(maxX, node.x);
+                    minY = Math.min(minY, node.y);
+                    maxY = Math.max(maxY, node.y);
+                }
+            });
+            
+            console.log('Found', matchCount, 'matching sentences for keywords:', selectedKeywords);
+            
+            // Count unique URLs (links) from the filtered results
+            const uniqueUrls = new Set();
+            filteredNodeIds.forEach(id => {
+                if (nodes[id] && nodes[id].url) {
+                    uniqueUrls.add(nodes[id].url);
+                }
+            });
+            
+            // Update count
+            const countHeader = document.getElementById('count-header');
+            if (countHeader) {
+                countHeader.textContent = `${uniqueUrls.size} links, ${matchCount} sentences`;
+            }
+            
+            // Clear and re-render
+            for (let [id, group] of renderedGroups) {
+                group.remove();
+            }
+            renderedGroups.clear();
+            
+            if (matchCount > 0) {
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+                const width = maxX - minX;
+                const height = maxY - minY;
+                const padding = 100;
+                
+                const zoomX = width > 0 ? (window.innerWidth - padding) / width : 1;
+                const zoomY = height > 0 ? (window.innerHeight - padding) / height : 1;
+                zoom = Math.min(zoomX, zoomY, 3);
+                zoom = Math.max(zoom, 0.5);
+                
+                offsetX = window.innerWidth / 2 - centerX * zoom;
+                offsetY = window.innerHeight / 2 - centerY * zoom;
+                
+                svg.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${zoom})`;
+                
+                setTimeout(() => {
+                    render();
+                }, 0);
+            }
+        }
+
+        async function init() {
+            try {
+                // Load keywords from precomputed JSON
+                const keywordsResponse = await fetch('./data/keywords_precomputed.json');
+                if (!keywordsResponse.ok) throw new Error(`Keywords load failed: ${keywordsResponse.status}`);
+                const keywordsData = await keywordsResponse.json();
+                
+                // Build keyword variations map from embedded_keywords and speculative_keywords
+                const allKeywords = {
+                    ...keywordsData.embedded_keywords,
+                    ...keywordsData.speculative_keywords
+                };
+                for (const [keyword, variations] of Object.entries(allKeywords)) {
+                    keywordVariations[keyword.toLowerCase()] = variations.map(v => v.toLowerCase());
+                }
+                console.log(`✓ Loaded ${Object.keys(keywordVariations).length} keywords with variations`);
+                
+                // Load keyword color mapping
+                const colorResponse = await fetch('./data/colorsnew.json');
+                if (!colorResponse.ok) throw new Error(`Color mapping load failed: ${colorResponse.status}`);
+                const colorData = await colorResponse.json();
+                
+                // Build keyword -> color map (RGB array format)
+                for (const [keyword, rgbArray] of Object.entries(colorData)) {
+                    keywordColors[keyword.toLowerCase()] = `rgb(${rgbArray[0]}, ${rgbArray[1]}, ${rgbArray[2]})`;
+                }
+                console.log(`✓ Loaded ${Object.keys(keywordColors).length} keyword colors`);
+                
+                // Load keywords analysis data
+                const analysisResponse = await fetch('./data/keywords_analysis.json');
+                if (!analysisResponse.ok) throw new Error(`Analysis load failed: ${analysisResponse.status}`);
+                const analysisData = await analysisResponse.json();
+                
+                // Build URL -> found keywords map
+                analysisData.results.forEach(result => {
+                    if (result.status === 'analyzed' && result.analysis) {
+                        const foundKeywords = new Set();
+                        
+                        // Add design keywords that were found
+                        if (result.analysis.design_keywords_found) {
+                            Object.keys(result.analysis.design_keywords_found).forEach(keyword => {
+                                foundKeywords.add(keyword.toLowerCase());
+                            });
+                        }
+                        
+                        // Add critical keywords that were found
+                        if (result.analysis.critical_keywords_found) {
+                            Object.keys(result.analysis.critical_keywords_found).forEach(keyword => {
+                                foundKeywords.add(keyword.toLowerCase());
+                            });
+                        }
+                        
+                        keywordsAnalysis[result.url] = Array.from(foundKeywords);
+                    }
+                });
+                console.log(`✓ Loaded analysis for ${Object.keys(keywordsAnalysis).length} URLs`);
+                
+                // Load sentences with positions (contains all 10,000+ sentences)
+                const response = await fetch('./data/sentences_with_positions.json');
+                if (!response.ok) throw new Error(`Load failed: ${response.status}`);
+                const sentencesData = await response.json();
+                
+                // Transform sentences to nodes format
+                nodes = sentencesData.map((item, index) => ({
+                    id: index,
+                    sentence: item.sentence,
+                    sample_sentence: item.sentence,
+                    url: item.url,
+                    keywords: [item.keyword],
+                    x: item.x,
+                    y: item.y,
+                    group: item.group,
+                    color: item.color || '#999999'
+                }));
+                
+                // Assign colors to nodes based on keyword
+                nodes.forEach(node => {
+                    if (node.keywords && node.keywords.length > 0) {
+                        const keyword = node.keywords[0].toLowerCase();
+                        node.color = keywordColors[keyword] || '#999999';
+                    }
+                });
+                
+                console.log(`✓ Loaded ${nodes.length} nodes with sample sentences`);
+                loading.textContent = '🎨 Rendering...';
+                
+                setupKeywordBoxes();
+                
+                // Calculate bounds to fit all nodes
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                nodes.forEach(n => {
+                    minX = Math.min(minX, n.x);
+                    maxX = Math.max(maxX, n.x);
+                    minY = Math.min(minY, n.y);
+                    maxY = Math.max(maxY, n.y);
+                });
+                
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+                const width = maxX - minX;
+                const height = maxY - minY;
+                
+                // Zoom to fit all nodes with minimal padding
+                const padding = 50;
+                const zoomX = (window.innerWidth - padding) / width;
+                const zoomY = (window.innerHeight - padding) / height;
+                zoom = Math.min(zoomX, zoomY, 2.5);  // Fit all nodes
+                offsetX = window.innerWidth / 2 - centerX * zoom;
+                offsetY = window.innerHeight / 2 - centerY * zoom;
+                
+                console.log(`Bounds: X [${minX.toFixed(0)}, ${maxX.toFixed(0)}], Y [${minY.toFixed(0)}, ${maxY.toFixed(0)}]`);
+                console.log(`Node size: ${width.toFixed(0)} x ${height.toFixed(0)}, Viewport: ${window.innerWidth} x ${window.innerHeight}`);
+                console.log(`Zoom calc - X: ${zoomX.toFixed(2)}, Y: ${zoomY.toFixed(2)}, Final: ${zoom.toFixed(2)}`);
+                console.log(`Position: offsetX=${offsetX.toFixed(0)}, offsetY=${offsetY.toFixed(0)}`);
+                
+                // Set SVG dimensions and apply transform immediately
+                svg.style.width = window.innerWidth;
+                svg.style.height = window.innerHeight;
+                svg.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${zoom})`;
+                svg.style.transformOrigin = '0 0';
+                
+                // Hide loading
+                loading.style.display = 'none';
+                
+                // Render all nodes and update count
+                const uniqueUrls = new Set();
+                nodes.forEach(node => {
+                    if (node.url) {
+                        uniqueUrls.add(node.url);
+                    }
+                });
+                
+                const countHeader = document.getElementById('count-header');
+                if (countHeader) {
+                    countHeader.textContent = `${uniqueUrls.size} links, ${nodes.length} sentences`;
+                }
+                animate();
+            } catch (error) {
+                loading.textContent = '❌ ' + error.message;
+            }
+        }
+
+        function getVisibleNodes() {
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const visible = [];
+            
+            // If filtered, add larger padding to ensure filtered nodes are visible
+            const padding = filteredNodeIds ? 500 : VIEWPORT_PADDING;
+            
+            for (let i = 0; i < nodes.length; i++) {
+                // Skip if filtered and this node is not in the filter
+                if (filteredNodeIds && !filteredNodeIds.has(i)) continue;
+                
+                const node = nodes[i];
+                // Transform node coordinates to screen space
+                const screenX = (node.x * zoom) + offsetX;
+                const screenY = (node.y * zoom) + offsetY;
+                
+                if (screenX > -padding && screenX < vw + padding &&
+                    screenY > -padding && screenY < vh + padding) {
+                    visible.push(i);
+                }
+            }
+            return visible;
+        }
+
+        function render() {
+            const visibleIds = new Set(getVisibleNodes());
+            
+            // Remove off-screen nodes
+            for (let [id, group] of renderedGroups) {
+                if (!visibleIds.has(id)) {
+                    group.remove();
+                    renderedGroups.delete(id);
+                }
+            }
+            
+            // Add on-screen nodes
+            for (let id of visibleIds) {
+                if (renderedGroups.has(id)) continue;
+                
+                const node = nodes[id];
+                
+                // Skip nodes without keywords
+                if (!node.keywords || node.keywords.length === 0) continue;
+                
+                const r = Math.max(2, 5 * zoom);
+                
+                // Create group - position in SVG coordinate space, let CSS transform handle zoom/pan
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('data-id', id);
+                g.setAttribute('transform', `translate(${node.x},${node.y})`);
+                
+                // Text label - use sample_sentence from keyword extraction
+                if (node.sample_sentence) {
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', 8);
+                    text.setAttribute('y', -4);
+                    text.setAttribute('class', 'node-text');
+                    text.setAttribute('fill', node.color || '#999999');  // Use keyword-based color
+                    
+                    // Display the sample sentence
+                    const sentence = node.sample_sentence;
+                    const words = sentence.split(' ');
+                    let line = '';
+                    let lineNum = 0;
+                    
+                    for (let word of words) {
+                        if ((line + word).length > 70) {
+                            const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                            tspan.setAttribute('x', 8);
+                            tspan.setAttribute('dy', lineNum === 0 ? 0 : '1.2em');
+                            tspan.textContent = line.trim();
+                            text.appendChild(tspan);
+                            line = word + ' ';
+                            lineNum++;
+                        } else {
+                            line += word + ' ';
+                        }
+                    }
+                    
+                    // Add last line
+                    if (line.trim()) {
+                        const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                        tspan.setAttribute('x', 8);
+                        tspan.setAttribute('dy', lineNum === 0 ? 0 : '1.2em');
+                        tspan.textContent = line.trim();
+                        text.appendChild(tspan);
+                    }
+                    
+                    g.appendChild(text);
+                }
+                
+                // Click handler on text - open URL directly
+                const textElements = g.querySelectorAll('.node-text');
+                textElements.forEach(text => {
+                    text.style.cursor = 'pointer';
+                    text.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (node.url) {
+                            window.open(node.url, '_blank');
+                        }
+                    });
+                    
+                    // Hover handlers
+                    text.addEventListener('mouseover', (e) => {
+                        svg.appendChild(g);  // Move group to end to bring to foreground
+                        
+                        // Show keyword count panel using keywords that were actually found
+                        const foundKeywords = keywordsAnalysis[node.url] || [];
+                        
+                        if (foundKeywords.length > 0 && node.sample_sentence) {
+                            const sentenceLower = node.sample_sentence.toLowerCase();
+                            const keywordCounts = {};
+                            
+                            // Count occurrences of each found keyword using variations
+                            foundKeywords.forEach(keyword => {
+                                const keywordLower = keyword.toLowerCase();
+                                const variations = keywordVariations[keywordLower] || [keywordLower];
+                                
+                                let totalCount = 0;
+                                variations.forEach(variation => {
+                                    const regex = new RegExp('\\b' + variation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+                                    const matches = sentenceLower.match(regex);
+                                    totalCount += matches ? matches.length : 0;
+                                });
+                                
+                                if (totalCount > 0) {
+                                    keywordCounts[keywordLower] = totalCount;
+                                }
+                            });
+                            
+                            // Build HTML for keyword counts
+                            let html = '';
+                            for (const [keyword, count] of Object.entries(keywordCounts)) {
+                                const color = keywordColors[keyword] || '#999';
+                                html += `<span class="keyword-count-item" style="background: ${color}20; border: 1px solid ${color};">`;
+                                html += `<span class="keyword-name" style="color: ${color};">${keyword}</span>`;
+                                html += `<span class="keyword-count">×${count}</span>`;
+                                html += `</span>`;
+                            }
+                            
+                            if (html) {
+                                keywordCountPanel.innerHTML = html;
+                                keywordCountPanel.classList.add('visible');
+                            }
+                        }
+                    });
+                    
+                    text.addEventListener('mouseout', () => {
+                        keywordCountPanel.classList.remove('visible');
+                    });
+                });
+                
+                svg.appendChild(g);
+                renderedGroups.set(id, g);
+            }
+
+            // Update allNodeTexts for search and reapply current search
+            allNodeTexts = Array.from(document.querySelectorAll('.node-text'));
+            if (currentSearchTerm.length > 0) {
+                allNodeTexts.forEach(text => {
+                    if (text.textContent.toLowerCase().includes(currentSearchTerm)) {
+                        text.classList.add('search-match');
+                        text.parentNode.classList.add('hovered');
+                    } else {
+                        text.classList.remove('search-match');
+                        text.parentNode.classList.remove('hovered');
+                    }
+                });
+            } else {
+                allNodeTexts.forEach(text => {
+                    text.classList.remove('search-match');
+                    text.parentNode.classList.remove('hovered');
+                });
+            }
+        }
+
+        function animate() {
+            render();
+            requestAnimationFrame(animate);
+        }
+
+        // Drag/pan - ONLY uses CSS transforms (GPU accelerated)
+        let lastMoveTime = 0;
+        const moveThrottle = 8;
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('a, #info-panel, #about-btn, #title')) return;
+            isDragging = true;
+            dragStart = { x: e.clientX - offsetX, y: e.clientY - offsetY };
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const now = Date.now();
+            if (now - lastMoveTime < moveThrottle) return;
+            lastMoveTime = now;
+            
+            offsetX = e.clientX - dragStart.x;
+            offsetY = e.clientY - dragStart.y;
+            svg.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${zoom})`;
+        });
+
+        document.addEventListener('mouseup', () => isDragging = false);
+
+        // Zoom with mouse wheel
+        document.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const factor = e.deltaY > 0 ? 0.95 : 1.05;
+            const oldZoom = zoom;
+            zoom = Math.max(0.2, Math.min(5, zoom * factor));
+            
+            offsetX = e.clientX - (e.clientX - offsetX) * (zoom / oldZoom);
+            offsetY = e.clientY - (e.clientY - offsetY) * (zoom / oldZoom);
+            
+            svg.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${zoom})`;
+        }, { passive: false });
+
+        // Close info panel
+        infoPanel.addEventListener('click', (e) => {
+            if (e.target === infoPanel) infoPanel.classList.remove('visible');
+        });
+
+        // Window resize
+        window.addEventListener('resize', () => {
+            svg.style.width = window.innerWidth;
+            svg.style.height = window.innerHeight;
+        });
+
+        // Setup SVG
+        svg.style.transformOrigin = '0 0';
+        svg.style.willChange = 'transform';
+
+        init();
+    </script>
+</body>
+</html>

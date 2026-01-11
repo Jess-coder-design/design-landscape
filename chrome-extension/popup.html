@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 300px;
+      padding: 10px;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      border: 3px solid #FF1493;
+    }
+    h2 {
+      font-size: 16px;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    .info {
+      font-size: 12px;
+      color: #666;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .button-group button {
+      flex: 1;
+    }
+    button {
+      padding: 10px;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    #reload {
+      width: 100%;
+      background-color: #4CAF50;
+    }
+    #reload:hover {
+      background-color: #45a049;
+    }
+    #download-urls {
+      width: 100%;
+      background-color: #FF6600;
+      margin-bottom: 10px;
+    }
+    #download-urls:hover {
+      background-color: #E55A00;
+    }
+    #add-landscape {
+      background-color: #008CBA;
+    }
+    #add-landscape:hover {
+      background-color: #007399;
+    }
+    #add {
+      background-color: #008CBA;
+    }
+    #add:hover {
+      background-color: #007399;
+    }
+  </style>
+</head>
+<body>
+  <div class="button-group">
+    <button id="add-landscape">Add Page to Landscape</button>
+    <button id="add">ADD</button>
+  </div>
+  <button id="download-urls">Download all_urls.json</button>
+  <h2>Keyword Highlighter</h2>
+  <p class="info">This extension highlights keywords from csv2.csv on any webpage.</p>
+  <p class="info">Keywords are highlighted in <mark style="background-color: yellow;">yellow</mark>.</p>
+  <button id="reload">Reload Page</button>
+</body>
+<script src="popup.js"></script>
+</html>

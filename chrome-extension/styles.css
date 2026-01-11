@@ -1,0 +1,27 @@
+body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="12" cy="12" r="10" fill="none" stroke="black" stroke-width="2"/><line x1="18" y1="18" x2="28" y2="28" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="12" cy="12" r="10" fill="none" stroke="black" stroke-width="2"/><line x1="18" y1="18" x2="28" y2="28" stroke="black" stroke-width="2"/></svg>') 12 12, auto;
+}
+
+.keyword-highlight {
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.keyword-highlight:hover {
+  opacity: 0.8;
+}
+
+.keyword-highlight.clicked {
+  font-weight: bold;
+}
+
+.keyword-highlight.clicked {
+  font-weight: bold;
+}

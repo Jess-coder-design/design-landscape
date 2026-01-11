@@ -1,0 +1,10 @@
+{
+  "name": "design-landscape",
+  "version": "1.0.0",
+  "description": "3D Design Landscape Visualization with Crowdsourced Contributions",
+  "main": "index.js",
+  "dependencies": {
+    "mongodb": "^5.9.0"
+  },
+  "devDependencies": {}
+}

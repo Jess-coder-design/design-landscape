@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design Landscape - Practice/Theory - Past/Future</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400&display=swap');
+        
+        .arimo-active-bat {
+            font-family: "Arimo", sans-serif;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: white;
+            overflow: visible !important;
+            width: 100%;
+            height: 100%;
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: inset 0 0 40px #FF6600;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        html {
+            overflow: visible !important;
+            width: 100%;
+            height: 100%;
+            scrollbar-width: none;
+        }
+
+        html::-webkit-scrollbar {
+            display: none;
+        }
+
+        svg {
+            display: block;
+            overflow: visible !important;
+        }
+
+        #drag-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            cursor: grab;
+            pointer-events: none;
+        }
+
+        #drag-overlay:active {
+            cursor: grabbing;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+        #sticky-labels {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .axis-line {
+            stroke: #ccc;
+            stroke-width: 2px;
+            stroke-dasharray: 4;
+        }
+
+        .axis-label {
+            font-size: 13px;
+            font-weight: bold;
+            fill: #666;
+            text-anchor: middle;            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+        }
+
+        .corner-label {
+            font-size: 11px;
+            fill: #999;
+            font-style: italic;
+        }
+
+        .node-text {
+            font-size: 11px;
+            text-anchor: middle;
+            user-select: none;
+            cursor: pointer;
+            word-break: break-word;
+            font-weight: 500;
+            font-size: 9px;
+            pointer-events: auto;
+        }
+
+        .node-text:hover {
+            fill: black;
+            font-weight: bold;
+            cursor: pointer;
+            text-shadow: 
+                -2px -2px 0 white,
+                2px -2px 0 white,
+                -2px 2px 0 white,
+                2px 2px 0 white,
+                -3px 0 0 white,
+                3px 0 0 white,
+                0 -3px 0 white,
+                0 3px 0 white,
+                -1px -1px 0 white,
+                1px -1px 0 white,
+                -1px 1px 0 white,
+                1px 1px 0 white,
+                -3px -3px 0 white,
+                3px -3px 0 white,
+                -3px 3px 0 white,
+                3px 3px 0 white;
+        }
+
+        .node-text.hovered {
+            fill: black;
+            z-index: 10000;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        
+        .node-group {
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        
+        .node-group.hovered {
+            z-index: 10000;
+        }
+
+        #info-panel {
+            position: fixed;
+            background: white;
+            border: 1px solid #333;
+            padding: 4px 6px;
+            max-width: 200px;
+            font-size: 10px;
+            z-index: 999;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            pointer-events: auto;
+        }
+
+        #info-panel.visible {
+            display: block;
+        }
+
+        #info-panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+            word-break: break-all;
+        }
+
+        #info-panel p {
+            margin: 4px 0;
+            word-break: break-word;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: black;
+            text-decoration: underline;
+        }
+
+        #about-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            border: 1.5px solid #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            transition: all 0.2s ease;
+        }
+        
+        #about-btn:hover {
+            background: #FF6600;
+            border-color: #FF6600;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        #zoom-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 65px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: transparent;
+            color: #666;
+            font-size: 12px;
+            border: 1.5px solid #666;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 14px;
+        }
+
+        #search-container {
+            position: fixed;
+            bottom: 25px;
+            right: 105px;
+            width: 200px;
+            background: white;
+            border: 1.5px solid #666;
+            border-radius: 4px;
+            padding: 8px;
+            display: none;
+            z-index: 99;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #search-input {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+
+        #search-close {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .search-match {
+            fill: black !important;
+            font-weight: bold;
+            z-index: 10000;
+            position: relative;
+        }
+
+        .search-match tspan {
+            fill: black !important;
+            text-shadow: 
+                -2px -2px 0 white,
+                2px -2px 0 white,
+                -2px 2px 0 white,
+                2px 2px 0 white,
+                -3px 0 0 white,
+                3px 0 0 white,
+                0 -3px 0 white,
+                0 3px 0 white,
+                -1px -1px 0 white,
+                1px -1px 0 white,
+                -1px 1px 0 white,
+                1px 1px 0 white,
+                -3px -3px 0 white,
+                3px -3px 0 white,
+                -3px 3px 0 white,
+                3px 3px 0 white;
+        }
+
+        .viewport-label {
+            cursor: pointer;
+            transition: color 0.2s, font-weight 0.2s;
+        }
+
+        .viewport-label:hover {
+            color: #333;
+            font-weight: bold;
+        }
+
+        #title {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: #666;
+            z-index: 2147483647;
+            pointer-events: auto;
+            font-family: Arial, sans-serif;
+            background: white;
+            border: 1.5px solid #666;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.2s ease;
+        }
+
+        #crit-logo {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            z-index: 100;
+            pointer-events: none;
+            font-family: Arial, sans-serif;
+        }
+
+        .clickable-word {
+            cursor: pointer;
+            color: #666;
+            border: 1.5px solid #666;
+            border-radius: 20px;
+            padding: 2px 8px;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+            display: inline-block;
+        }
+
+        .clickable-word:hover {
+            border-color: #FF6600;
+            background-color: rgba(255, 102, 0, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="drag-overlay"></div>
+    <svg></svg>
+    <div id="crit-logo">CR!T</div>
+    <div id="title">
+        <div style="margin-bottom: 6px;">...links, ...sentences</div>
+        I was wondering what words are used in <span class="clickable-word" data-word="critical">critical</span> <span class="clickable-word" data-word="design">design</span>?
+    </div>
+    <div id="word-options" style="display: none; position: fixed; background: white; border: 1.5px solid #666; border-radius: 4px; padding: 12px; min-width: 250px; z-index: 2147483648; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-height: 300px; overflow-y: auto;"></div>
+    <div id="info-panel">
+        <h3 id="panel-title"></h3>
+        <div id="panel-content"></div>
+    </div>
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search URLs...">
+        <button id="search-close">×</button>
+    </div>
+    <div id="zoom-btn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#666" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><line x1="10" y1="10" x2="14" y2="14"/></svg></div>
+    <div id="about-btn">?</div>
+    <div id="loading">Loading...</div>
+
+    <script>
+        let simulation;
+
+        async function loadAndVisualize() {
+            try {
+                // Load all data from single consolidated file
+                console.log('⚡ Loading landscape data...');
+                const response = await fetch('./data/landscape_all_data.json');
+                if (!response.ok) throw new Error(`Failed to load landscape_all_data.json: ${response.status}`);
+                const allData = await response.json();
+                const landscapeMetadata = allData.metadata;
+                const nodesData = allData.nodes;
+                console.log(`✓ Loaded ${nodesData.length} nodes`);
+
+                // NOW proceed with visualization
+                visualizeData(nodesData, landscapeMetadata);
+            } catch (error) {
+                console.error('❌ Error in loadAndVisualize:', error);
+                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+            }
+        }
+
+        function visualizeData(nodesData, landscapeMetadata) {
+            try {
+                console.log('🎨 Starting visualization with', nodesData.length, 'nodes');
+
+                // Use pre-computed metadata
+                const bounds = landscapeMetadata.bounds;
+                const svgDims = landscapeMetadata.svg;
+                const width = svgDims.width;
+                const height = svgDims.height;
+                const marginX = svgDims.marginX;
+                const marginY = svgDims.marginY;
+                const xMid = bounds.xMid;
+                const yMid = bounds.yMid;
+
+                // Color mapping for design concepts (from chrome highlighter palette)
+                const conceptColors = {
+                    'critical_design': '#FFD700',           // gold
+                    'speculative_design': '#FF6B6B',        // red
+                    'conceptual_design': '#95E1D3',         // mint
+                    'reflective_design': '#F38181',         // pink
+                    'reflexive_design': '#AA96DA',          // purple
+                    'collaborative_design': '#FCBAD3',      // light pink
+                    'interdisciplinary_design': '#A8D8EA',  // light blue
+                    'iterative_design': '#FFB4A2',          // salmon
+                    'deconstructive_design': '#CAFFBF',     // light green
+                    'critical_craft': '#FFD6A5',            // peach
+                    'evaluative design': '#DDA0DD',         // plum
+                    'theoretical design': '#87CEEB',        // sky blue
+                    'analytical design': '#F0E68C',         // khaki
+                    'contextual design': '#98FB98',         // pale green
+                    'narrative design': '#FFB6C1',          // light pink rose
+                    'exploring design': '#FFA500',          // orange
+                    'discursive design': '#DA70D6',         // orchid
+                    'systemic design': '#20B2AA'            // light sea green
+                };
+
+                // Setup SVG
+                const svg = d3.select('svg');
+                
+                // Lazy loading state
+                let allNodesData = [];
+                let renderedNodeIds = new Set();
+                const nodesPerBatch = 50;
+                let currentBatchIndex = 0;
+
+                svg.attr('viewBox', [0, 0, width, height])
+                   .attr('width', width)
+                   .attr('height', height);
+
+                // Pan/drag functionality
+                let offsetX = 0, offsetY = 0;
+                let zoom = 1;
+                let isDragging = false;
+                let startX, startY;
+
+                const overlay = document.getElementById('drag-overlay');
+
+                function centerView() {
+                    const svgCenter = { x: width / 2, y: height / 2 };
+                    const viewportCenter = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+                    offsetX = viewportCenter.x - svgCenter.x * zoom;
+                    offsetY = viewportCenter.y - svgCenter.y * zoom;
+                    svg.style('transform', `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${zoom})`);
+                }
+
+                centerView();
+
+                // Throttle function for mousemove - ONLY UPDATE TRANSFORM, NO RENDER
+                let lastMoveTime = 0;
+                const moveThrottle = 8; // ~120fps for drag responsiveness
+
+                document.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return;
+                    let target = e.target;
+                    while (target && target !== document.body) {
+                        if (target.tagName === 'A' || target.id === 'info-panel') return;
+                        target = target.parentElement;
+                    }
+                    isDragging = true;
+                    startX = e.clientX - offsetX;
+                    startY = e.clientY - offsetY;
+                    overlay.style.cursor = 'grabbing';
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    const now = Date.now();
+                    if (now - lastMoveTime < moveThrottle) return;
+                    lastMoveTime = now;
+                    
+                    offsetX = e.clientX - startX;
+                    offsetY = e.clientY - startY;
+                    // ONLY UPDATE TRANSFORM - no render(), no DOM changes
+                    svg.style('transform', `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${zoom})`);
+                }, { passive: true });
+
+                document.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    overlay.style.cursor = 'grab';
+                });
+
+                overlay.addEventListener('mouseleave', () => {
+                    isDragging = false;
+                    overlay.style.cursor = 'grab';
+                });
+
+                // Throttle wheel events
+                let lastWheelTime = 0;
+                const wheelThrottle = 100;
+
+                document.addEventListener('wheel', (e) => {
+                    const now = Date.now();
+                    if (now - lastWheelTime < wheelThrottle) return;
+                    lastWheelTime = now;
+                    
+                    e.preventDefault();
+                    const deltaY = e.deltaY > 0 ? 0.9 : 1.1;
+                    const oldZoom = zoom;
+                    zoom = Math.max(0.1, Math.min(3, zoom * deltaY));
+                    const zoomRatio = zoom / oldZoom;
+                    offsetX = e.clientX - (e.clientX - offsetX) * zoomRatio;
+                    offsetY = e.clientY - (e.clientY - offsetY) * zoomRatio;
+                    svg.style('transform', `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${zoom})`);
+                    overlay.style.cursor = 'grab';
+                }, { passive: false });
+
+                svg
+                .style('display', 'block')
+                .style('transition', 'none')
+                .style('transform-origin', '0 0')
+                .style('will-change', 'transform')
+                .style('backface-visibility', 'hidden')
+                .style('perspective', '1000px');
+
+                // Use pre-computed UMAP embeddings and bounds from metadata
+                console.log('✓ Using pre-computed UMAP embeddings and landscape metadata');
+                console.log(`UMAP ranges: X [${bounds.minX.toFixed(2)}, ${bounds.maxX.toFixed(2)}], Y [${bounds.minY.toFixed(2)}, ${bounds.maxY.toFixed(2)}]`);
+
+                // Define keyword categories with 35 unique colors (matching chrome extension exactly)
+                const keywordCategories = {
+                    "design": { keywords: ["design", "designs", "designed", "designing", "designer", "designers"], color: "#FFD700" },
+                    "method": { keywords: ["method", "methods", "methodology", "methodological"], color: "#FF6B6B" },
+                    "making": { keywords: ["make", "makes", "making", "made", "maker", "makers"], color: "#4ECDC4" },
+                    "applied art": { keywords: ["applied art", "applied arts"], color: "#95E1D3" },
+                    "intention": { keywords: ["intention", "intentions", "intentional", "intentionally", "intent"], color: "#F38181" },
+                    "plan": { keywords: ["plan", "plans", "planning", "planned"], color: "#AA96DA" },
+                    "research": { keywords: ["research", "researches", "researching", "researched", "researcher", "researchers"], color: "#FCBAD3" },
+                    "tool": { keywords: ["tool", "tools", "tooling"], color: "#A8D8EA" },
+                    "inquiry": { keywords: ["inquiry", "inquiries", "inquire", "inquiring"], color: "#FFB4A2" },
+                    "practice": { keywords: ["practice", "practices", "practicing", "practitioner", "practitioners"], color: "#E0BBE4" },
+                    "work": { keywords: ["work", "works", "working", "worked", "worker", "workers"], color: "#CAFFBF" },
+                    "concept": { keywords: ["concept", "concepts", "conceptual", "conceptualize", "conceptualization"], color: "#FFD6A5" },
+                    "craft": { keywords: ["craft", "crafts", "crafting", "crafted", "craftsman", "craftsmanship"], color: "#FFC6FF" },
+                    "exploration": { keywords: ["exploration", "explorations", "explore", "exploring", "explorer"], color: "#BDB2FF" },
+                    "engineering": { keywords: ["engineer", "engineers", "engineering", "engineered"], color: "#A0D995" },
+                    "shape": { keywords: ["shape", "shapes", "shaping", "shaped"], color: "#FF7F50" },
+                    "project": { keywords: ["project", "projects", "projecting", "projected"], color: "#6495ED" },
+                    "critical": { keywords: ["critical", "criticality"], color: "#DDA0DD" },
+                    "conceptual": { keywords: ["conceptual", "conceptualize", "conceptualization"], color: "#F0E68C" },
+                    "analytical": { keywords: ["analysis", "analyses", "analytical", "analyze", "analyzing"], color: "#FF69B4" },
+                    "deconstructive": { keywords: ["deconstruct", "deconstructing", "deconstruction", "deconstructive"], color: "#87CEEB" },
+                    "collaborative": { keywords: ["collaborate", "collaborating", "collaboration", "collaborative"], color: "#98FB98" },
+                    "interdisciplinary": { keywords: ["interdiscipline", "interdisciplinary"], color: "#FFE4B5" },
+                    "contextual": { keywords: ["context", "contexts", "contextualize", "contextual"], color: "#F0FFFF" },
+                    "iterative": { keywords: ["iterate", "iterating", "iteration", "iterative"], color: "#FFDAB9" },
+                    "reflective": { keywords: ["reflect", "reflecting", "reflection", "reflective"], color: "#EEE8AA" },
+                    "theoretical": { keywords: ["theory", "theories", "theoretical", "theorize"], color: "#F5DEB3" },
+                    "evaluative": { keywords: ["evaluate", "evaluating", "evaluation", "evaluative"], color: "#CD5C5C" },
+                    "investigative": { keywords: ["investigate", "investigating", "investigation", "investigative"], color: "#66CDAA" },
+                    "explore": { keywords: ["explore", "exploring", "exploration", "explorative"], color: "#7FFFD4" },
+                    "dialectical": { keywords: ["dialectic", "dialectical"], color: "#20B2AA" },
+                    "discursive": { keywords: ["discourse", "discursive"], color: "#FF8C00" },
+                    "reflexive": { keywords: ["reflexive", "reflexivity"], color: "#FFD700" },
+                    "narrative": { keywords: ["narrate", "narrative", "narration"], color: "#FF6B6B" },
+                    "speculative": { keywords: ["speculate", "speculating", "speculation", "speculative"], color: "#4ECDC4" },
+                    "systemic": { keywords: ["system", "systemic", "systematically"], color: "#95E1D3" }
+                };
+
+                // Create scale functions for axis positioning
+                const xScale = d => marginX + (d - bounds.minX) / (bounds.maxX - bounds.minX) * (width - 2 * marginX);
+                const yScale = d => marginY + (d - bounds.minY) / (bounds.maxY - bounds.minY) * (height - 2 * marginY);
+
+                // Flatten all keywords for highlighting
+                const allKeywords = [];
+                Object.values(keywordCategories).forEach(data => {
+                    allKeywords.push(...data.keywords);
+                });
+
+                // Create nodes with UMAP positions (lazy loading) - just use nodes directly
+                // No transformation needed since all data is already in the correct format
+                allNodesData = nodesData;
+                
+                console.log(`✓ Prepared ${allNodesData.length} nodes for lazy loading`);
+
+                // Use pre-computed counts
+                const totalLinks = landscapeMetadata.counts.total_links;
+                const totalSentences = landscapeMetadata.counts.total_sentences;
+                const countsDiv = document.querySelector('#title > div:first-child');
+                if (countsDiv) {
+                    countsDiv.textContent = `${totalLinks} links, ${totalSentences} sentences`;
+                }
+
+                // Draw axes
+                const g = svg.append('g');
+
+                // Vertical axis (Y) - extends across full SVG
+                g.append('line')
+                    .attr('class', 'axis-line')
+                    .attr('x1', xScale(xMid))
+                    .attr('x2', xScale(xMid))
+                    .attr('y1', -100000)
+                    .attr('y2', 100000);
+
+                // Horizontal axis (X) - extends across full SVG
+                g.append('line')
+                    .attr('class', 'axis-line')
+                    .attr('x1', -100000)
+                    .attr('x2', 100000)
+                    .attr('y1', yScale(yMid))
+                    .attr('y2', yScale(yMid));
+
+                // Add sticky axis labels
+                const labels = [
+                    { text: 'PRACTICE', x: xScale(xMid), y: marginY * 0.3, anchor: 'middle' },
+                    { text: 'THEORY', x: xScale(xMid), y: height - marginY * 0.3, anchor: 'middle' },
+                    { text: 'PAST', x: marginX * 0.5, y: yScale(yMid), anchor: 'end' },
+                    { text: 'FUTURE', x: width - marginX * 0.5, y: yScale(yMid), anchor: 'start' }
+                ];
+
+                labels.forEach(label => {
+                    g.append('text')
+                        .attr('class', 'axis-label')
+                        .attr('x', label.x)
+                        .attr('y', label.y)
+                        .attr('text-anchor', label.anchor)
+                        .attr('font-size', '20px')
+                        .attr('font-weight', 'bold')
+                        .attr('fill', '#666')
+                        .text(label.text);
+                });
+
+                // Add fixed position viewport labels that are always visible
+                const viewportLabels = [
+                    { id: 'vp-practice', text: 'PRACTICE', style: 'top: 70px; left: 50%; transform: translate(-50%, 0);' },
+                    { id: 'vp-theory', text: 'THEORY', style: 'bottom: 10px; left: 50%; transform: translate(-50%, 0);' },
+                    { id: 'vp-future', text: 'FUTURE', style: 'top: 50%; right: 10px; transform: translateY(-50%);' },
+                    { id: 'vp-past', text: 'PAST', style: 'top: 50%; left: 10px; transform: translateY(-50%);' }
+                ];
+
+                viewportLabels.forEach(label => {
+                    if (!document.getElementById(label.id)) {
+                        const div = document.createElement('div');
+                        div.id = label.id;
+                        div.textContent = label.text;
+                        div.className = 'viewport-label';
+                        div.style.cssText = `${label.style}position: fixed; z-index: 10000; display: block !important; color: #666; font-size: 14px; font-weight: bold; pointer-events: auto; font-family: Arial, sans-serif; visibility: visible !important;`;
+                        
+                        // Add click handlers for panning
+                        div.addEventListener('click', () => {
+                            const panAmount = 500;
+                            let newOffsetX = offsetX;
+                            let newOffsetY = offsetY;
+                            
+                            if (label.id === 'vp-theory') {
+                                newOffsetY -= panAmount; // Pan down to theory
+                            } else if (label.id === 'vp-practice') {
+                                newOffsetY += panAmount; // Pan up to practice
+                            } else if (label.id === 'vp-future') {
+                                newOffsetX -= panAmount; // Pan right to future
+                            } else if (label.id === 'vp-past') {
+                                newOffsetX += panAmount; // Pan left to past
+                            }
+                            
+                            // Smooth drag-like animation
+                            const duration = 600;
+                            const startTime = Date.now();
+                            const startOffsetX = offsetX;
+                            const startOffsetY = offsetY;
+                            
+                            const animate = () => {
+                                const elapsed = Date.now() - startTime;
+                                const progress = Math.min(elapsed / duration, 1);
+                                
+                                // Ease-out for natural deceleration
+                                const easeProgress = 1 - Math.pow(1 - progress, 2);
+                                
+                                offsetX = startOffsetX + (newOffsetX - startOffsetX) * easeProgress;
+                                offsetY = startOffsetY + (newOffsetY - startOffsetY) * easeProgress;
+                                
+                                svg.style('transform', `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${zoom})`);
+                                
+                                if (progress < 1) {
+                                    requestAnimationFrame(animate);
+                                }
+                            };
+                            
+                            animate();
+                        });
+                        
+                        document.body.appendChild(div);
+                    }
+                });
+
+                // Define keywords for each category with unique colors
+                // Function to highlight keywords in text
+                // Render nodes lazily in batches
+                function renderNodeBatch(startIdx, endIdx) {
+                    const nodesToRender = allNodesData.slice(startIdx, endIdx);
+                    
+                    const nodeTexts = g.selectAll(`.node-text-${startIdx}`)
+                        .data(nodesToRender, d => d.id)
+                        .enter()
+                        .append('g')
+                        .attr('class', `node-group node-group-${startIdx}`)
+                        .attr('transform', d => `translate(${d.x}, ${d.y})`);
+                    
+                    // Add text with line breaks and pre-computed keyword highlighting
+                    nodeTexts.append('text')
+                        .attr('class', 'node-text')
+                        .attr('text-anchor', 'middle')
+                        .attr('dy', '-1.5em')
+                        .attr('font-size', '9px')
+                        .attr('font-weight', 'normal')
+                        .attr('fill', d => d.color)
+                        .each(function(d) {
+                            // Only show sentences
+                            if (!d.highlighted_sentence || d.highlighted_sentence.length === 0) {
+                                return;
+                            }
+                            
+                            // Render pre-computed highlighted sentence
+                            const lineLength = 8;
+                            let isFirstLine = true;
+                            const highlighted = d.highlighted_sentence;
+                            
+                            for (let i = 0; i < highlighted.length; i += lineLength) {
+                                const lineWords = highlighted.slice(i, i + lineLength);
+                                
+                                lineWords.forEach((wordData, wordIndex) => {
+                                    const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                                    
+                                    // First word of a new line gets x and dy attributes
+                                    if (wordIndex === 0 && !isFirstLine) {
+                                        tspan.setAttribute('x', '0');
+                                        tspan.setAttribute('dy', '1.0em');
+                                    } else if (wordIndex > 0) {
+                                        // Other words in same line get dx spacing
+                                        tspan.setAttribute('dx', '0.25em');
+                                    }
+                                    
+                                    tspan.textContent = wordData.word;
+                                    
+                                    // Store word data on the tspan element for hover handlers
+                                    tspan._wordData = wordData;
+                                    
+                                    // Use pre-computed keyword color
+                                    if (wordData.isKeyword && wordData.color) {
+                                        tspan.setAttribute('fill', wordData.color);
+                                        tspan.setAttribute('font-weight', 'bold');
+                                    }
+                                    
+                                    this.appendChild(tspan);
+                                });
+                                
+                                isFirstLine = false;
+                            }
+                        })
+                        // Add hover handlers directly to text elements
+                        .on('mouseenter', function(e, d) {
+                            // Only show info if node has a sentence
+                            if (d.sentence) {
+                                // Move element's parent group to front
+                                this.parentNode.parentNode.appendChild(this.parentNode);
+                            }
+                        })
+                        .on('mouseleave', function(e, d) {
+                            closePanel();
+                        })
+                        .on('click', function(e, d) {
+                            if (d.url) {
+                                window.open(d.url, '_blank');
+                            }
+                        });
+                    
+                    // Track rendered nodes
+                    nodesToRender.forEach(n => renderedNodeIds.add(n.id));
+                }
+
+                // Load initial batch
+                renderNodeBatch(0, Math.min(nodesPerBatch, allNodesData.length));
+                document.getElementById('loading').textContent = `Rendering visualization: ${Math.min(nodesPerBatch, allNodesData.length)}/${allNodesData.length}`;
+
+                // Load remaining nodes progressively
+                let currentLoadIdx = nodesPerBatch;
+                const loadMoreNodes = () => {
+                    if (currentLoadIdx < allNodesData.length) {
+                        const nextIdx = Math.min(currentLoadIdx + nodesPerBatch, allNodesData.length);
+                        renderNodeBatch(currentLoadIdx, nextIdx);
+                        document.getElementById('loading').textContent = `Rendering visualization: ${nextIdx}/${allNodesData.length}`;
+                        currentLoadIdx = nextIdx;
+                        
+                        if (currentLoadIdx < allNodesData.length) {
+                            requestAnimationFrame(loadMoreNodes);
+                        } else {
+                            console.log('✅ All nodes loaded, calling search function');
+                            setTimeout(() => {
+                                document.getElementById('loading').style.display = 'none';
+                                findAndScrollToSection();
+                            }, 300);
+                        }
+                    }
+                };
+
+                // Start loading more nodes
+                requestAnimationFrame(loadMoreNodes);
+
+                // Search functionality
+                const searchContainer = document.getElementById('search-container');
+                const searchInput = document.getElementById('search-input');
+                const searchClose = document.getElementById('search-close');
+                let allNodeTexts = [];
+
+                const zoomBtn = document.getElementById('zoom-btn');
+                if (zoomBtn) {
+                    zoomBtn.addEventListener('click', () => {
+                        if (searchContainer) {
+                            searchContainer.style.display = searchContainer.style.display === 'none' ? 'block' : 'none';
+                            if (searchContainer.style.display === 'block' && searchInput) {
+                                searchInput.focus();
+                                allNodeTexts = Array.from(document.querySelectorAll('.node-text'));
+                            }
+                        }
+                    });
+                }
+
+                if (searchClose) {
+                    searchClose.addEventListener('click', () => {
+                        if (searchContainer) {
+                            searchContainer.style.display = 'none';
+                        }
+                        if (searchInput) {
+                            searchInput.value = '';
+                            allNodeTexts.forEach(text => text.classList.remove('search-match'));
+                        }
+                    });
+                }
+
+                if (searchInput) {
+                    let searchTimeout;
+                    searchInput.addEventListener('input', (e) => {
+                        clearTimeout(searchTimeout);
+                        searchTimeout = setTimeout(() => {
+                            const searchTerm = e.target.value.toLowerCase();
+                            allNodeTexts.forEach(text => {
+                                if (searchTerm && text.textContent.toLowerCase().includes(searchTerm)) {
+                                    text.classList.add('search-match');
+                                    text.parentNode.classList.add('hovered');
+                                    text.parentNode.parentNode.classList.add('hovered');
+                                } else {
+                                    text.classList.remove('search-match');
+                                    text.parentNode.classList.remove('hovered');
+                                    text.parentNode.parentNode.classList.remove('hovered');
+                                }
+                            });
+                        }, 100);
+                    });
+                }
+
+                // About button handler
+                const aboutBtn = document.getElementById('about-btn');
+                if (aboutBtn) {
+                    aboutBtn.addEventListener('click', () => {
+                        window.location.href = 'about.html';
+                    });
+                }
+
+
+            } catch (error) {
+                console.error('Error in visualizeData:', error);
+                console.error('Stack:', error.stack);
+                document.getElementById('loading').textContent = 'Error loading data: ' + error.message;
+            }
+        }
+
+        function showInfo(node, x, y) {
+            const panel = document.getElementById('info-panel');
+            
+            // Position the panel near the cursor/keyword
+            if (x !== undefined && y !== undefined) {
+                panel.style.left = x + 'px';
+                panel.style.top = y + 'px';
+            }
+            
+            let content = '';
+            
+            // Show keyword analysis if available
+            if (node.analysis) {
+                const analysis = node.analysis;
+                
+                // Show direct phrase combinations with sentences
+                if (analysis.direct_phrase_combinations && analysis.direct_phrase_combinations.length > 0) {
+                    content += `<p style="margin: 4px 0 2px 0; padding-top: 4px; border-top: 1px solid #ddd; font-size: 10px; font-weight: bold; color: #FF6600;">Keywords Found:</p>`;
+                    
+                    analysis.direct_phrase_combinations.forEach((combo) => {
+                        content += `<p style="margin: 4px 0; font-size: 9px; color: #555;">`;
+                        content += `<strong>${combo.phrase}</strong>`;
+                        if (combo.order) {
+                            content += ` <span style="font-size: 8px; color: #999;">(${combo.order})</span>`;
+                        }
+                        content += `</p>`;
+                        
+                        if (combo.sentence) {
+                            content += `<p style="margin: 2px 0 4px 0; font-size: 8px; line-height: 1.3; color: #666; font-style: italic;">"${combo.sentence.substring(0, 150)}${combo.sentence.length > 150 ? '...' : ''}"</p>`;
+                        }
+                    });
+                }
+                
+                // Show design and critical keywords found
+                if (Object.keys(analysis.design_keywords_found).length > 0 || Object.keys(analysis.critical_keywords_found).length > 0) {
+                    content += `<p style="margin: 4px 0 2px 0; padding-top: 4px; border-top: 1px solid #ddd; font-size: 9px; font-weight: bold;">Analysis:</p>`;
+                    
+                    if (Object.keys(analysis.design_keywords_found).length > 0) {
+                        content += `<p style="margin: 2px 0; font-size: 8px; color: #555;"><strong>Design:</strong> `;
+                        const designKeywords = Object.entries(analysis.design_keywords_found)
+                            .flatMap(([category, keywords]) => keywords.slice(0, 2))
+                            .slice(0, 5);
+                        content += designKeywords.join(', ') + `</p>`;
+                    }
+                    
+                    if (Object.keys(analysis.critical_keywords_found).length > 0) {
+                        content += `<p style="margin: 2px 0; font-size: 8px; color: #555;"><strong>Critical:</strong> `;
+                        const criticalKeywords = Object.entries(analysis.critical_keywords_found)
+                            .flatMap(([category, keywords]) => keywords.slice(0, 2))
+                            .slice(0, 5);
+                        content += criticalKeywords.join(', ') + `</p>`;
+                    }
+                }
+                
+                // Show which conditions were met
+                const conditionsMet = [];
+                if (analysis.condition1_met) conditionsMet.push('Separate');
+                if (analysis.condition2_met) conditionsMet.push('Nearby');
+                if (analysis.condition3_met) conditionsMet.push('Combined');
+                
+                if (conditionsMet.length > 0) {
+                    content += `<p style="margin: 4px 0; font-size: 8px; color: #666;"><strong>Matched:</strong> ${conditionsMet.join(' • ')}</p>`;
+                }
+            }
+            
+            // Get real keyword counts from the page
+            const keywordCounts = node.keyword_counts || {};
+            
+            // If we have keyword counts, show them
+            if (Object.keys(keywordCounts).length > 0) {
+                // Sort by count descending and filter out 0 counts
+                const sortedKeywords = Object.entries(keywordCounts)
+                    .filter(([, count]) => count > 0)
+                    .sort(([, a], [, b]) => b - a);
+                
+                // Calculate total for percentages
+                const totalCount = sortedKeywords.reduce((sum, [, count]) => sum + count, 0);
+                
+                content += `<p style="margin: 4px 0 2px 0; padding-top: 4px; border-top: 1px solid #ddd; font-size: 9px; font-weight: bold;">Concepts:</p>`;
+                
+                sortedKeywords.forEach(([key, count]) => {
+                    const percent = totalCount > 0 ? (count / totalCount * 100).toFixed(0) : 0;
+                    content += `<p style="margin: 1px 0; font-size: 9px;">${key.replace(/_/g, ' ')}: ${count}w - ${percent}%</p>`;
+                });
+            } else {
+                // Fallback if no keyword counts available
+                if (!node.analysis || !node.analysis.direct_phrase_combinations || node.analysis.direct_phrase_combinations.length === 0) {
+                    content += `<p style="margin: 1px 0; font-size: 9px;">URL: <a href="${node.id}" target="_blank" style="color: #0066cc; text-decoration: none;">${node.id}</a></p>`;
+                }
+            }
+
+            // Add designer links if available
+            if (node.designer && node.designer.length > 0) {
+                content += `<p style="margin: 4px 0 2px 0; padding-top: 4px; border-top: 1px solid #ddd; font-size: 9px; font-weight: bold;">Designer(s):</p>`;
+                node.designer.forEach((designer, index) => {
+                    const designerUrl = node.designer_url && node.designer_url[index] ? node.designer_url[index] : '#';
+                    if (designerUrl !== '#') {
+                        content += `<p style="margin: 2px 0; font-size: 9px;"><a href="${designerUrl}" target="_blank" style="color: #0066cc; text-decoration: none;">${designer}</a></p>`;
+                    } else {
+                        content += `<p style="margin: 2px 0; font-size: 9px;">${designer}</p>`;
+                    }
+                });
+            }
+
+            document.getElementById('panel-content').innerHTML = content;
+            document.getElementById('panel-title').style.display = 'none';
+            panel.classList.add('visible');
+        }
+
+        function closePanel() {
+            document.getElementById('info-panel').classList.remove('visible');
+        }
+
+        window.addEventListener('load', loadAndVisualize);
+
+        // Check for keywords passed from extension
+        function findAndScrollToSection() {
+            const params = new URLSearchParams(window.location.search);
+            const kw1 = params.get('kw1');
+            const kw2 = params.get('kw2');
+            
+            if (kw1 && kw2) {
+                console.log('🔍 Looking for section with keywords:', kw1, 'and', kw2);
+                
+                // Find all node text elements
+                const nodeTexts = document.querySelectorAll('.node-text');
+                console.log('Found', nodeTexts.length, 'node text elements to search');
+                
+                let bestSection = null;
+                let highestScore = 0;
+                const matchingElements = [];
+                
+                nodeTexts.forEach((element, idx) => {
+                    // Get text from tspans with proper spacing
+                    const tspans = element.querySelectorAll('tspan');
+                    let text = '';
+                    tspans.forEach(tspan => {
+                        text += tspan.textContent + ' ';
+                    });
+                    text = text.toLowerCase();
+                    
+                    const kw1Lower = kw1.toLowerCase();
+                    const kw2Lower = kw2.toLowerCase();
+                    
+                    // Count occurrences of both keywords (without strict word boundaries)
+                    const kw1Count = (text.match(new RegExp(kw1Lower, 'g')) || []).length;
+                    const kw2Count = (text.match(new RegExp(kw2Lower, 'g')) || []).length;
+                    
+                    const score = kw1Count * kw2Count;
+                    
+                    if (score > 0) {
+                        console.log(`Element ${idx}: ${kw1Lower}:${kw1Count} ${kw2Lower}:${kw2Count} score:${score}`);
+                        matchingElements.push(element);
+                    }
+                    
+                    if (score > highestScore && score > 0) {
+                        highestScore = score;
+                        bestSection = element;
+                    }
+                });
+                
+                if (bestSection) {
+                    console.log('✅ Found best section with score:', highestScore);
+                    console.log(`📊 Filtering to ${matchingElements.length} nodes that contain both keywords`);
+                    
+                    // Hide all nodes that don't match
+                    nodeTexts.forEach((element) => {
+                        if (matchingElements.includes(element)) {
+                            element.parentNode.style.opacity = '1';
+                            element.parentNode.style.pointerEvents = 'auto';
+                        } else {
+                            element.parentNode.style.opacity = '0.1';
+                            element.parentNode.style.pointerEvents = 'none';
+                        }
+                    });
+                    
+                    // Get tspans and reconstruct text with spaces
+                    const tspans = bestSection.querySelectorAll('tspan');
+                    let sectionText = '';
+                    tspans.forEach(tspan => {
+                        sectionText += tspan.textContent + ' ';
+                    });
+                    console.log('Section text:', sectionText.substring(0, 150));
+                    // Wait a bit for render, then scroll
+                    setTimeout(() => {
+                        bestSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Highlight it briefly
+                        bestSection.style.fill = 'black';
+                        bestSection.style.fontWeight = 'bold';
+                        console.log('📍 Scrolled to section');
+                    }, 500);
+                } else {
+                    console.log('❌ No section found with both keywords');
+                }
+            }
+        }
+        
+        // Don't call on load - will be called after nodes render
+        // window.addEventListener('load', findAndScrollToSection);
+
+        // Word options data - define BEFORE using in functions
+        const wordOptions = {
+            'critical': ['critical', 'conceptual', 'analytical', 'deconstructive', 'collaborative', 'interdisciplinary', 'contextual', 'iterative', 'reflective', 'theoretical', 'evaluative', 'investigative', 'explore', 'dialectical', 'discursive', 'reflexive', 'narrative', 'speculative', 'systemic'],
+            'design': ['design', 'method', 'making', 'applied art', 'intention', 'plan', 'research', 'tool', 'inquiry', 'practice', 'work', 'concept', 'craft', 'exploration', 'engineering', 'shape', 'project']
+        };
+
+        // Add click handlers for clickable words
+        function setupClickableWords() {
+            console.log('Setting up clickable words...');
+            const clickableWords = document.querySelectorAll('.clickable-word');
+            console.log('Found', clickableWords.length, 'clickable words');
+            const wordOptionsDiv = document.getElementById('word-options');
+            
+            if (!wordOptionsDiv) {
+                console.error('word-options div not found!');
+                return;
+            }
+            
+            clickableWords.forEach(word => {
+                word.addEventListener('click', (e) => {
+                    console.log('Clicked word:', word.getAttribute('data-word'));
+                    e.stopPropagation();
+                    const wordType = word.getAttribute('data-word');
+                    const options = wordOptions[wordType] || [];
+                    console.log('Options for', wordType, ':', options);
+                    
+                    // Build HTML for options
+                    let html = '';
+                    options.forEach(option => {
+                        html += `<div style="padding: 4px 0; font-size: 11px; color: #666; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.color='#FF6600'; this.style.fontWeight='bold';" onmouseout="this.style.color='#666'; this.style.fontWeight='normal';" onclick="selectWord('${wordType}', '${option}')">${option}</div>`;
+                    });
+                    
+                    wordOptionsDiv.innerHTML = html;
+                    wordOptionsDiv.style.display = 'block';
+                    console.log('Dropdown should be visible now');
+                    
+                    // Position dropdown at the clicked word
+                    const rect = word.getBoundingClientRect();
+                    wordOptionsDiv.style.left = rect.left + 'px';
+                    wordOptionsDiv.style.top = (rect.bottom + 8) + 'px';
+                });
+            });
+            
+            // Close when clicking elsewhere
+            document.addEventListener('click', () => {
+                wordOptionsDiv.style.display = 'none';
+            });
+        }
+        
+        // Function to select a word from dropdown
+        function selectWord(wordType, selectedWord) {
+            console.log('Selected:', wordType, '=', selectedWord);
+            
+            // Find the span with this word type and update it
+            const titleDiv = document.getElementById('title');
+            const wordSpan = titleDiv.querySelector(`[data-word="${wordType}"]`);
+            
+            if (wordSpan) {
+                wordSpan.textContent = selectedWord;
+                wordSpan.setAttribute('data-original', wordType);
+                console.log('Updated', wordType, 'to', selectedWord);
+            }
+            
+            // Close dropdown
+            document.getElementById('word-options').style.display = 'none';
+            
+            // Now filter the landscape to show only sentences with both words
+            const allSpans = titleDiv.querySelectorAll('.clickable-word');
+            let word1 = '', word2 = '';
+            
+            allSpans.forEach(span => {
+                const dataWord = span.getAttribute('data-word');
+                if (dataWord === 'critical') {
+                    word1 = span.textContent.toLowerCase();
+                } else if (dataWord === 'design') {
+                    word2 = span.textContent.toLowerCase();
+                }
+            });
+            
+            if (word1 && word2) {
+                console.log('🔄 Filtering landscape for:', word1, 'and', word2);
+                filterLandscape(word1, word2);
+            }
+        }
+        
+        // Function to filter landscape nodes
+        function filterLandscape(kw1, kw2) {
+            const nodeTexts = document.querySelectorAll('.node-text');
+            console.log('Filtering', nodeTexts.length, 'nodes for keywords:', kw1, 'and', kw2);
+            
+            let bestSection = null;
+            let highestScore = 0;
+            const matchingElements = [];
+            
+            nodeTexts.forEach((element, idx) => {
+                // Get text from tspans with proper spacing
+                const tspans = element.querySelectorAll('tspan');
+                let text = '';
+                tspans.forEach(tspan => {
+                    text += tspan.textContent + ' ';
+                });
+                text = text.toLowerCase();
+                
+                // Count occurrences of both keywords using word boundaries
+                const kw1Regex = new RegExp(`\\b${kw1}\\b`, 'g');
+                const kw2Regex = new RegExp(`\\b${kw2}\\b`, 'g');
+                const kw1Count = (text.match(kw1Regex) || []).length;
+                const kw2Count = (text.match(kw2Regex) || []).length;
+                
+                const score = kw1Count * kw2Count;
+                
+                if (score > 0) {
+                    matchingElements.push(element);
+                    console.log(`✓ Match ${idx}: "${text.substring(0, 80)}..." | ${kw1}:${kw1Count} ${kw2}:${kw2Count} score:${score}`);
+                }
+                
+                if (score > highestScore && score > 0) {
+                    highestScore = score;
+                    bestSection = element;
+                }
+            });
+            
+            console.log(`Found ${matchingElements.length} matching nodes with best score ${highestScore}`);
+            
+            // Hide all nodes that don't match
+            nodeTexts.forEach((element) => {
+                if (matchingElements.includes(element)) {
+                    element.parentNode.style.opacity = '1';
+                    element.parentNode.style.pointerEvents = 'auto';
+                    
+                    // Highlight the keywords in orange in matching nodes
+                    const tspans = element.querySelectorAll('tspan');
+                    tspans.forEach(tspan => {
+                        const text = tspan.textContent.toLowerCase();
+                        if (text === kw1 || text === kw2) {
+                            tspan.setAttribute('fill', '#FF6600');
+                            tspan.setAttribute('font-weight', 'bold');
+                        } else {
+                            // Reset if not a keyword
+                            if (tspan.getAttribute('fill') === '#FF6600') {
+                                tspan.setAttribute('fill', '#666');
+                                tspan.setAttribute('font-weight', 'normal');
+                            }
+                        }
+                    });
+                } else {
+                    element.parentNode.style.opacity = '0.1';
+                    element.parentNode.style.pointerEvents = 'none';
+                }
+            });
+            
+            // Scroll to best section
+            if (bestSection) {
+                setTimeout(() => {
+                    bestSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    bestSection.style.fill = 'black';
+                    bestSection.style.fontWeight = 'bold';
+                    console.log('📍 Scrolled to best matching section');
+                }, 300);
+            }
+        }
+        
+        // Run immediately since DOM is already loaded
+        setupClickableWords();
+    </script>
+</body>
+</html>

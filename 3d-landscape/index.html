@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Critical Design UMAP - 3D Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            overflow: hidden;
+            color: #333;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            box-shadow: inset 0 0 40px #FF6600;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        /* UI Panels */
+        #info-panel {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.95);
+            border: 2px solid #FF6600;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            z-index: 100;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        #info-panel h2 {
+            color: #FF6600;
+            margin-bottom: 12px;
+            font-size: 16px;
+            border-bottom: 1px solid #FF6600;
+            padding-bottom: 8px;
+        }
+
+        #info-panel p {
+            margin: 8px 0;
+            color: #ccc;
+        }
+
+        #sentence-display {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            border: 1.5px solid #666;
+            padding: 12px;
+            border-radius: 4px;
+            max-width: 400px;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 11px;
+        }
+
+        #sentence-display .sentence {
+            color: #333;
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        #sentence-display .url {
+            color: #0066cc;
+            font-size: 10px;
+            text-decoration: none;
+        }
+
+        #sentence-display .url:hover {
+            text-decoration: underline;
+        }
+        #sentence-center {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.98);
+            border: 3px solid #FF6600;
+            padding: 40px;
+            border-radius: 12px;
+            max-width: 800px;
+            max-height: 400px;
+            z-index: 200;
+            display: none;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(255, 102, 0, 0.3);
+            overflow-y: auto;
+        }
+
+        #sentence-center.visible {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #sentence-center .sentence-text {
+            color: #FFFFFF;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        #sentence-center .metadata {
+            color: #FFD700;
+            font-size: 14px;
+            margin-top: 15px;
+            border-top: 1px solid #FF6600;
+            padding-top: 15px;
+        }
+
+        #sentence-center .metadata-item {
+            margin: 5px 0;
+        }
+
+        #sentence-center .url {
+            color: #00BFFF;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        #sentence-center .url:hover {
+            text-decoration: underline;
+        }
+
+        #sentence-display.visible {
+            display: block;
+        }
+
+        /* Controls */
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            border: 1.5px solid #666;
+            padding: 12px;
+            border-radius: 4px;
+            z-index: 100;
+            font-size: 11px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #controls h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .control-item {
+            margin: 8px 0;
+        }
+
+        .control-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            color: #333;
+        }
+
+        .control-item input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        .control-item input[type="range"] {
+            width: 150px;
+            margin-left: 8px;
+        }
+
+        /* Color legend */
+        #legend {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border: 1.5px solid #666;
+            padding: 12px;
+            border-radius: 4px;
+            z-index: 100;
+            font-size: 11px;
+            max-width: 250px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #legend h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .legend-item {
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 102, 0, 0.1);
+        }
+
+        .legend-item.selected {
+            background: rgba(255, 102, 0, 0.3);
+            border: 1px solid #FF6600;
+            font-weight: bold;
+        }
+
+        /* Axis labels - always visible at viewport edges */
+        .axis-label {
+            position: fixed;
+            z-index: 99;
+            font-weight: bold;
+            font-size: 12px;
+            pointer-events: none;
+            padding: 6px 10px;
+            border-radius: 0px;
+            white-space: nowrap;
+            color: white;
+            background: rgba(200, 50, 50, 0.9);
+            border: 2px solid #C83232;
+        }
+
+        #axis-x-label {
+        }
+
+        /* Embedded/Speculative boxes */
+        .region-label {
+            position: fixed;
+            z-index: 98;
+            font-weight: bold;
+            font-size: 12px;
+            pointer-events: none;
+            padding: 6px 10px;
+            border-radius: 0px;
+            white-space: nowrap;
+            color: white;
+            background: rgba(50, 100, 200, 0.9);
+            border: 2px solid #3264C8;
+        }
+
+        #embedded-label {
+        }
+
+        #speculative-label {
+        }
+
+        /* Loading */
+        #loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 1.5px solid #666;
+            padding: 30px 50px;
+            border-radius: 4px;
+            font-size: 16px;
+            color: #333;
+            z-index: 1000;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        #stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            border: 1px solid #FF6600;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 11px;
+            color: #ccc;
+            font-family: monospace;
+        }
+
+        #crit-logo {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            z-index: 100;
+            pointer-events: none;
+            font-family: Arial, sans-serif;
+        }
+
+        #about-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: transparent;
+            color: #666;
+            font-size: 14px;
+            border: 1.5px solid #666;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+            transition: all 0.2s ease;
+        }
+        
+        #about-btn:hover {
+            background: #FF6600;
+            border-color: #FF6600;
+            color: white;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Loading the landscape for you...</div>
+    
+    <div id="crit-logo">CR!T</div>
+    <div id="about-btn">?</div>
+    
+    <!-- Central sentence display -->
+    <div id="sentence-center">
+        <div class="sentence-text" id="center-sentence-text"></div>
+        <div class="metadata" id="center-metadata"></div>
+    </div>
+    <div id="legend">
+        <h3>Words used</h3>
+        <div id="legend-items" style="max-height: 300px; overflow-y: auto; font-size: 11px;"></div>
+        <div style="margin-top: 12px; font-size: 10px; color: #999;">
+            Click keywords to filter • Click multiple to combine
+        </div>
+        <div id="active-filters" style="margin-top: 12px; padding: 8px; background: rgba(255,102,0,0.1); border-radius: 4px; min-height: 30px; border: 1px solid #FF6600;">
+            <div style="font-size: 10px; color: #999; font-weight: bold;">Active Filters:</div>
+            <div id="filter-list" style="margin-top: 6px; font-size: 10px;"></div>
+        </div>
+    </div>
+
+    <!-- Axis labels -->
+    <div id="axis-x-label" class="axis-label">Semantic Similarity</div>
+
+    <!-- Region labels -->
+    <div id="embedded-label" class="region-label">Embedded</div>
+    <div id="speculative-label" class="region-label">Speculative</div>
+
+    <div id="controls">
+        <div style="margin-top: 0px; padding-top: 0px; border-top: none; font-size: 10px; color: #666;">
+            <strong>3D Navigation:</strong><br>
+            Click + drag: Rotate<br>
+            Scroll: Zoom<br>
+            Right-click + drag: Pan<br>
+            <br>
+            <strong style="color: #FF6600;">Drawing Tools:</strong><br>
+            <strong>D</strong>: Toggle drawing mode<br>
+            <strong>Click</strong> 2 points to draw line<br>
+            <strong>T</strong>: Add text label<br>
+            <strong>Click</strong> location to place text<br>
+            <strong>C</strong>: Clear all drawings<br>
+            <br>
+            <strong>Filtering:</strong><br>
+            Click keywords to filter
+        </div>
+    </div>
+
+    <div id="sentence-display"></div>
+    
+    <div id="stats"></div>
+
+    <!-- Three.js ES Modules -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.150.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        // ========================================================================
+        // PART 2: THREE.JS VISUALIZATION
+        // ========================================================================
+
+        const loading = document.getElementById('loading');
+        const sentenceDisplay = document.getElementById('sentence-display');
+        const sentenceCenter = document.getElementById('sentence-center');
+        const centerSentenceText = document.getElementById('center-sentence-text');
+        const centerMetadata = document.getElementById('center-metadata');
+        const statsDiv = document.getElementById('stats');
+
+        let scene, camera, renderer, controls;
+        let pointsMesh;
+        let data = [];
+        let keywords = null;
+        let raycaster = new THREE.Raycaster();
+        let mouse = new THREE.Vector2();
+        
+        // Axis endpoints for dynamic label positioning
+        let axisEndpoints = {
+            x: new THREE.Vector3(),
+            y: new THREE.Vector3(),
+            z_embedded: new THREE.Vector3(),  // Negative Z (embedded)
+            z_speculative: new THREE.Vector3()  // Positive Z (speculative)
+        };
+
+        // ========================================================================
+        // STEP 7: Initialize Three.js scene
+        // ========================================================================
+        function initScene() {
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xFFFFFF);
+
+            camera = new THREE.PerspectiveCamera(
+                60,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            camera.position.z = 50;
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            document.body.appendChild(renderer.domElement);
+
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.autoRotate = false;
+
+            // Enable right-click context menu
+            renderer.domElement.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                return false;
+            }, false);
+        }
+
+        function addAxes() {
+            // Create simple axis lines with text labels
+            const axesGroup = new THREE.Group();
+            
+            // Calculate bounding box from data to determine axis length and center
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            let minZ = Infinity, maxZ = -Infinity;
+            const spreadFactor = 20.0;
+            
+            data.forEach(d => {
+                const x = d.x * spreadFactor;
+                const y = d.y * spreadFactor;
+                const z = d.z * spreadFactor;
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+                minZ = Math.min(minZ, z);
+                maxZ = Math.max(maxZ, z);
+            });
+            
+            // Calculate center of data cloud
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+            const centerZ = (minZ + maxZ) / 2;
+            
+            // Add 10% padding to axis length beyond data bounds
+            const padX = (maxX - minX) * 0.1;
+            const padY = (maxY - minY) * 0.1;
+            const padZ = (maxZ - minZ) * 0.1;
+            
+            // X axis (red) - horizontal line through center
+            const xGeometry = new THREE.BufferGeometry();
+            xGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([minX - padX, centerY, centerZ, maxX + padX, centerY, centerZ]), 3));
+            const xMaterial = new THREE.LineBasicMaterial({ color: 0xFF0000, linewidth: 3 });
+            const xLine = new THREE.Line(xGeometry, xMaterial);
+            axesGroup.add(xLine);
+            
+            // Y axis (green) - vertical line through center
+            const yGeometry = new THREE.BufferGeometry();
+            yGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([centerX, minY - padY, centerZ, centerX, maxY + padY, centerZ]), 3));
+            const yMaterial = new THREE.LineBasicMaterial({ color: 0x00FF00, linewidth: 3 });
+            const yLine = new THREE.Line(yGeometry, yMaterial);
+            axesGroup.add(yLine);
+            
+            // Z axis (blue) - depth line through center
+            const zGeometry = new THREE.BufferGeometry();
+            zGeometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array([centerX, centerY, minZ - padZ, centerX, centerY, maxZ + padZ]), 3));
+            const zMaterial = new THREE.LineBasicMaterial({ color: 0x0000FF, linewidth: 3 });
+            const zLine = new THREE.Line(zGeometry, zMaterial);
+            axesGroup.add(zLine);
+
+            // Add text labels - position at ends of each axis
+            const xLabel = makeAxisLabel('Semantic Similarity', 0xFF0000);
+            xLabel.position.set(maxX + padX, centerY, centerZ);
+            axesGroup.add(xLabel);
+
+            const yLabel = makeAxisLabel('Design Space', 0x00FF00);
+            yLabel.position.set(centerX, maxY + padY, centerZ);
+            axesGroup.add(yLabel);
+
+            const zLabel = makeAxisLabel('Embedded ↔ Speculative', 0x0000FF);
+            zLabel.position.set(centerX, centerY, maxZ + padZ);
+            axesGroup.add(zLabel);
+
+            // Store axis endpoints for dynamic label positioning
+            axisEndpoints.x.set(maxX + padX, centerY, centerZ);
+            axisEndpoints.y.set(centerX, maxY + padY, centerZ);
+            axisEndpoints.z_embedded.set(centerX, centerY, minZ - padZ);  // Embedded (negative Z)
+            axisEndpoints.z_speculative.set(centerX, centerY, maxZ + padZ);  // Speculative (positive Z)
+
+            scene.add(axesGroup);
+            console.log('✓ Axes added at center of data cloud');
+        }
+
+        function makeAxisLabel(text, colorHex) {
+            // Create canvas for axis label with larger dimensions for longer text
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 1024;
+            canvas.height = 128;
+
+            // Clear background
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw text
+            const color = new THREE.Color(colorHex);
+            const colorStr = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
+            context.fillStyle = colorStr;
+            context.font = 'Bold 48px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(text, 512, 64);
+
+            // Create texture
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.magFilter = THREE.LinearFilter;
+            texture.minFilter = THREE.LinearFilter;
+
+            const material = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(material);
+            sprite.scale.set(20, 2.5, 1);
+
+            return sprite;
+        }
+
+        // ========================================================================
+        // STEP 8: Load UMAP data
+        // ========================================================================
+        async function loadData() {
+            try {
+                const response = await fetch('./data/umap_3d_data.json');
+                if (!response.ok) throw new Error(`Failed to load: ${response.status}`);
+                data = await response.json();
+                console.log(`✓ Loaded ${data.length} data points`);
+                
+                // Load color mapping
+                const colorResponse = await fetch('./data/colorsnew.json');
+                if (!colorResponse.ok) throw new Error(`Failed to load colors: ${colorResponse.status}`);
+                keywordColorMap = await colorResponse.json();
+                console.log(`✓ Loaded ${Object.keys(keywordColorMap).length} keyword colors`);
+                
+                return true;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                loading.textContent = `❌ Error: ${error.message}`;
+                return false;
+            }
+        }
+
+        // ========================================================================
+        // STEP 9-10: Create 3D text sprites for all sentences
+        // ========================================================================
+        function createPoints() {
+            // Create text sprite for EVERY point
+            createAllTextSprites();
+            updateLegend();
+            fitCameraToPoints();  // Adjust camera to frame all points
+            
+            // Add axes after data is loaded
+            try {
+                addAxes();
+            } catch (e) {
+                console.error('Error adding axes:', e);
+            }
+            
+            console.log(`✓ Created ${data.length} text sprites`);
+        }
+
+        function fitCameraToPoints() {
+            // Calculate bounding box of all points
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            let minZ = Infinity, maxZ = -Infinity;
+
+            data.forEach(d => {
+                // Scale by spread factor of 20
+                const x = d.x * 20;
+                const y = d.y * 20;
+                const z = d.z * 20;
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+                minZ = Math.min(minZ, z);
+                maxZ = Math.max(maxZ, z);
+            });
+
+            // Calculate center and size
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+            const centerZ = (minZ + maxZ) / 2;
+
+            const sizeX = maxX - minX;
+            const sizeY = maxY - minY;
+            const sizeZ = maxZ - minZ;
+            const maxSize = Math.max(sizeX, sizeY, sizeZ);
+
+            // Position camera to frame all points - closer and more straight view
+            const distance = maxSize / (2 * Math.tan((camera.fov / 2) * Math.PI / 180));
+            
+            // Position camera straight on with minimal angle
+            camera.position.x = centerX + distance * 0.05;
+            camera.position.y = centerY + distance * 0.05;
+            camera.position.z = centerZ + distance * 0.4;
+
+            camera.lookAt(centerX, centerY, centerZ);
+            
+            // Update controls to orbit around the center
+            controls.target.set(centerX, centerY, centerZ);
+            controls.update();
+
+            console.log(`✓ Camera fitted to frame all ${data.length} points`);
+        }
+
+        function updateLegend() {
+            // Extract all unique keywords from the data
+            const keywordSet = new Set();
+            data.forEach(d => {
+                if (Array.isArray(d.keyword)) {
+                    d.keyword.forEach(kw => keywordSet.add(kw));
+                }
+            });
+            
+            // Sort keywords
+            const mainKeywords = Array.from(keywordSet).sort();
+            
+            const legendItems = document.getElementById('legend-items');
+            legendItems.innerHTML = '';
+            
+            mainKeywords.forEach(keyword => {
+                const color = keywordColorMap[keyword];
+                if (!color) return; // Skip if no color
+                
+                const [r, g, b] = color;
+                const colorStr = `rgb(${r}, ${g}, ${b})`;
+                
+                const item = document.createElement('div');
+                item.className = 'legend-item';
+                item.innerHTML = `
+                    <div class="legend-color" style="background: ${colorStr};"></div>
+                    <span>${keyword}</span>
+                `;
+                item.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleKeywordFilter(keyword, item, event);
+                });
+                legendItems.appendChild(item);
+            });
+        }
+
+        let textSprites = [];
+        let keywordColorMap = {};
+        let selectedKeywords = {}; // Track selected keywords: { keyword: clickCount }
+        let filteredIndices = new Set(); // Indices of visible points
+        
+        // Drawing mode variables
+        let drawingMode = false;
+        let userConnections = [];  // Store user-drawn connections
+        let selectedConnectionPoints = [];  // Track points for current connection
+        let connectionLines = [];  // Store line objects for rendering
+        let isDrawing = false;  // Track if currently drawing
+        let isMouseDown = false;  // Track if mouse button is currently pressed
+        let doodlePoints = [];  // Points in current doodle stroke
+        let currentDoodleLine = null;  // The line being drawn in real-time
+        let hoveredSentencePoint = null;  // Track which sentence is hovered during drawing
+        let hoveredSentencePosition = null;  // Position of hovered sentence for line starting point
+        let drawingStartPos = null;  // Starting position for the curve
+        
+        // Text mode variables
+        let textMode = false;
+        let userTextLabels = [];  // Store user-added text labels
+
+        function toggleKeywordFilter(keyword, element, event) {
+            // Prevent default and stop propagation
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            // Toggle keyword selection
+            if (!selectedKeywords[keyword]) {
+                selectedKeywords[keyword] = 1;
+            } else {
+                selectedKeywords[keyword]++;
+            }
+
+            // Max 3 clicks cycles through
+            if (selectedKeywords[keyword] > 3) {
+                delete selectedKeywords[keyword];
+                element.classList.remove('selected');
+            } else {
+                element.classList.add('selected');
+            }
+
+            // Update UI and filter
+            updateActiveFilters();
+            applyKeywordFilters();
+        }
+
+        function updateActiveFilters() {
+            const filterList = document.getElementById('filter-list');
+            const activeFilters = Object.entries(selectedKeywords);
+            
+            if (activeFilters.length === 0) {
+                filterList.innerHTML = '<div style="color: #666;">None</div>';
+                return;
+            }
+
+            filterList.innerHTML = activeFilters.map(([kw, count]) => 
+                `<div style="margin: 4px 0; padding: 4px; background: rgba(255,102,0,0.2); border-radius: 3px;">
+                    <strong>${kw}</strong> (${count}x)
+                </div>`
+            ).join('');
+        }
+
+        function clearAllFilters() {
+            selectedKeywords = {};
+            
+            // Update UI - deselect all legend items
+            document.querySelectorAll('.legend-item.selected').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // Update filters display
+            updateActiveFilters();
+            
+            // Reapply filters (which will show all points)
+            applyKeywordFilters();
+            
+            console.log('🔓 Filters cleared');
+        }
+
+        function applyKeywordFilters() {
+            const activeFilters = Object.entries(selectedKeywords);
+            
+            if (activeFilters.length === 0) {
+                // Show all points
+                textSprites.forEach(sprite => {
+                    sprite.visible = true;
+                });
+                filteredIndices.clear();
+            } else {
+                // Filter sentences based on keywords in the data array
+                filteredIndices.clear();
+                data.forEach((point, index) => {
+                    const keywordArray = Array.isArray(point.keyword) ? point.keyword : [];
+                    let matches = true;
+
+                    // Check each selected keyword with its required count
+                    for (const [keyword, requiredCount] of activeFilters) {
+                        // Count how many times this keyword appears in the keyword array
+                        const count = keywordArray.filter(kw => kw.toLowerCase() === keyword.toLowerCase()).length;
+                        
+                        // Must have exactly the required count
+                        if (count !== requiredCount) {
+                            matches = false;
+                            break;
+                        }
+                    }
+
+                    if (matches) {
+                        filteredIndices.add(index);
+                        textSprites[index].visible = true;
+                    } else {
+                        textSprites[index].visible = false;
+                    }
+                });
+
+                const count = filteredIndices.size;
+                console.log(`🔍 Filtered to ${count} sentences matching: ${JSON.stringify(selectedKeywords)}`);
+                statsDiv.innerHTML += `<br>Filtered: ${count} of ${data.length}`;
+            }
+
+            // Save filters to sessionStorage
+            sessionStorage.setItem('selectedKeywords', JSON.stringify(selectedKeywords));
+        }
+
+        function getMostFrequentKeyword(keywordArray) {
+            // Get the most frequently occurring keyword from the array
+            if (!Array.isArray(keywordArray) || keywordArray.length === 0) {
+                return 'default';
+            }
+            const counts = {};
+            keywordArray.forEach(kw => {
+                counts[kw] = (counts[kw] || 0) + 1;
+            });
+            let mostFrequent = keywordArray[0];
+            let maxCount = 1;
+            for (const [kw, count] of Object.entries(counts)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostFrequent = kw;
+                }
+            }
+            return mostFrequent;
+        }
+
+        function getKeywordColor(keyword) {
+            // Ensure keyword is a string
+            if (Array.isArray(keyword)) {
+                keyword = getMostFrequentKeyword(keyword);
+            }
+            if (!keyword || typeof keyword !== 'string') {
+                keyword = 'default';
+            }
+            // Create consistent color for each keyword
+            if (!keywordColorMap[keyword]) {
+                // Hash the keyword to get a consistent hue
+                let hash = 0;
+                for (let i = 0; i < keyword.length; i++) {
+                    hash = ((hash << 5) - hash) + keyword.charCodeAt(i);
+                    hash = hash & hash; // Convert to 32-bit integer
+                }
+                const hue = (Math.abs(hash) % 100) / 100; // 0-1
+                const saturation = 0.85;
+                const lightness = 0.55;
+                
+                const c = new THREE.Color();
+                c.setHSL(hue, saturation, lightness);
+                keywordColorMap[keyword] = c;
+            }
+            return keywordColorMap[keyword];
+        }
+
+        function createAllTextSprites() {
+            // Flatten keywords from precomputed file
+            const keywordsList = [];
+            
+            if (keywords) {
+                // Embedded keywords
+                for (const [name, variants] of Object.entries(keywords.embedded_keywords || {})) {
+                    variants.forEach(v => keywordsList.push(v));
+                }
+                // Speculative keywords
+                for (const [name, variants] of Object.entries(keywords.speculative_keywords || {})) {
+                    variants.forEach(v => keywordsList.push(v));
+                }
+                // Critique keywords
+                for (const [name, variants] of Object.entries(keywords.critique_keywords || {})) {
+                    variants.forEach(v => keywordsList.push(v));
+                }
+            }
+            
+            // Create text sprites for all sentences
+            const spreadFactor = 20.0;
+            const zSpreadFactor = 30.0;  // Spread embedded vs speculative wider on Z axis
+            data.forEach((d, i) => {
+                // Get most frequently occurring keyword from array for display
+                let displayKeyword = '';
+                if (Array.isArray(d.keyword) && d.keyword.length > 0) {
+                    displayKeyword = getMostFrequentKeyword(d.keyword);
+                } else if (typeof d.keyword === 'string') {
+                    displayKeyword = d.keyword;
+                }
+                
+                // Use pre-computed color from data, or default to white if not available
+                const color = d.color || [255, 255, 255];
+                const sprite = makeTextSprite(d.sentence, i, displayKeyword, color);
+                
+                // Use embedded_speculative score to position on Z axis
+                // Score -1 = fully embedded (negative Z), Score 1 = fully speculative (positive Z)
+                const zOffset = (d.embedded_speculative || 0) * zSpreadFactor;
+                sprite.position.set(d.x * spreadFactor, d.y * spreadFactor, d.z * spreadFactor + zOffset);
+                sprite.userData.keyword = displayKeyword;
+                scene.add(sprite);
+                textSprites.push(sprite);
+            });
+        }
+
+        function makeTextSprite(text, index, keyword, rgbColor) {
+            // Show full sentence text - no truncation
+            const fullText = text;
+
+            // Create canvas for text rendering
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d', { antialias: true });
+            canvas.width = 768;
+            canvas.height = 384;
+
+            // Use pre-computed RGB color or default to white
+            const [r, g, b] = rgbColor || [255, 255, 255];
+            const colorStr = `rgb(${r}, ${g}, ${b})`;
+
+            // COMPLETELY TRANSPARENT background (no box)
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Text in keyword color
+            context.fillStyle = colorStr;
+            context.font = 'Bold 18px Arial';
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+
+            // Word wrap for full text
+            const maxWidth = canvas.width - 40;
+            const lineHeight = 24;
+            const textWords = fullText.split(' ');
+            let line = '';
+            let y = 30;
+
+            textWords.forEach(word => {
+                const testLine = line + (line ? ' ' : '') + word;
+                const metrics = context.measureText(testLine);
+                
+                if (metrics.width > maxWidth && line) {
+                    context.fillText(line, canvas.width / 2, y);
+                    line = word;
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            });
+            if (line) context.fillText(line, canvas.width / 2, y);
+
+            // Create texture with high quality filtering
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.magFilter = THREE.LinearFilter;  // Sharp upscaling
+            texture.minFilter = THREE.LinearFilter;  // Sharp downscaling
+            
+            const material = new THREE.SpriteMaterial({ map: texture, sizeAttenuation: true });
+            const sprite = new THREE.Sprite(material);
+            sprite.originalColor = new THREE.Color(1, 1, 1);  // Store original white color
+            sprite.originalTexture = texture;
+            sprite.scale.set(4, 2, 1);
+            sprite.userData.index = index;
+            sprite.userData.sentence = text;
+
+            return sprite;
+        }
+
+        // ========================================================================
+        // Mouse interaction (hover to show sentence)
+        // ========================================================================
+        let selectedPoint = null;
+
+        window.addEventListener('mousemove', onMouseMove, false);
+        window.addEventListener('click', onMouseClick, false);
+        window.addEventListener('mousemove', onMouseMoveDraw, false);
+        window.addEventListener('mousedown', (event) => {
+            if (drawingMode && isDrawing) {
+                isMouseDown = true;
+                doodlePoints = [];  // Reset points for this drag
+            }
+        });
+        window.addEventListener('mouseup', (event) => {
+            if (drawingMode && isDrawing && isMouseDown) {
+                isMouseDown = false;
+                if (drawingStartPos && doodlePoints.length > 0) {
+                    const endPos = doodlePoints[doodlePoints.length - 1];
+                    createSmoothCurve(drawingStartPos, endPos);
+                }
+                isDrawing = false;
+                doodlePoints = [];
+                drawingStartPos = null;
+                if (currentDoodleLine) {
+                    scene.remove(currentDoodleLine);
+                    currentDoodleLine = null;
+                }
+            }
+        });
+
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            mouse.isHovering = true;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(textSprites);
+
+            // Find the first VISIBLE sprite (raycaster returns all intersects, not just visible ones)
+            let visibleSprite = null;
+            for (let i = 0; i < intersects.length; i++) {
+                if (intersects[i].object.visible) {
+                    visibleSprite = intersects[i].object;
+                    break;
+                }
+            }
+
+            if (visibleSprite) {
+                const index = visibleSprite.userData.index;
+                if (index !== undefined && data[index]) {
+                    const point = data[index];
+                    showSentenceAtPoint(point, index);
+                }
+            } else {
+                // No visible sprite found under cursor
+                mouse.isHovering = false;
+            }
+        }
+
+        function onMouseClick(event) {
+            // Check if click is on a UI element (legend, controls, etc.)
+            let target = event.target;
+            const isUIClick = target.closest('#legend') || 
+                             target.closest('#controls') || 
+                             target.closest('#info-panel') ||
+                             target.closest('#active-filters');
+
+            // If in text mode and clicking on canvas
+            if (textMode && !isUIClick) {
+                const textContent = prompt('Enter text label:');
+                if (textContent && textContent.trim()) {
+                    // Get the 3D position where user clicked (use raycaster to find closest point in space)
+                    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(textSprites);
+
+                    let clickPos;
+                    if (intersects.length > 0) {
+                        // If user clicked on a point, place text near that point
+                        const nearestPoint = intersects[0].object.position;
+                        clickPos = new THREE.Vector3(
+                            nearestPoint.x + 2,
+                            nearestPoint.y + 2,
+                            nearestPoint.z
+                        );
+                    } else {
+                        // Otherwise place text at a default distance from camera
+                        const direction = new THREE.Vector3(mouse.x, mouse.y, 0.5).normalize();
+                        clickPos = camera.position.clone().add(direction.multiplyScalar(10));
+                    }
+
+                    // Create text sprite
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = 512;
+                    canvas.height = 128;
+
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.fillStyle = '#FF6600';
+                    context.font = 'Bold 32px Arial';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    context.fillText(textContent, 256, 64);
+
+                    const texture = new THREE.CanvasTexture(canvas);
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.minFilter = THREE.LinearFilter;
+
+                    const material = new THREE.SpriteMaterial({ map: texture });
+                    const sprite = new THREE.Sprite(material);
+                    sprite.position.copy(clickPos);
+                    sprite.scale.set(4, 1, 1);
+
+                    scene.add(sprite);
+                    userTextLabels.push(sprite);
+
+                    console.log(`📝 Text label added: "${textContent}"`);
+                }
+                return;
+            }
+
+            // If in drawing mode and clicking on canvas
+            if (drawingMode && !isUIClick) {
+                isDrawing = !isDrawing;
+                if (isDrawing) {
+                    drawingStartPos = hoveredSentencePosition ? hoveredSentencePosition.clone() : null;
+                    doodlePoints = [];
+                    console.log('✏️ Started doodling...');
+                } else {
+                    // Finished drawing - create the curve between start and end
+                    if (drawingStartPos && doodlePoints.length > 0) {
+                        const endPos = doodlePoints[doodlePoints.length - 1];
+                        createSmoothCurve(drawingStartPos, endPos);
+                    }
+                    doodlePoints = [];
+                    drawingStartPos = null;
+                }
+                return;
+            }
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(textSprites);
+
+            // Check if clicking on a sentence (which opens a URL)
+            let clickedOnSentence = false;
+            for (let i = 0; i < intersects.length; i++) {
+                if (intersects[i].object.visible) {
+                    const sprite = intersects[i].object;
+                    const index = sprite.userData.index;
+                    if (index !== undefined && data[index]) {
+                        selectedPoint = index;
+                        // Open the URL if one exists
+                        if (data[index].url) {
+                            window.open(data[index].url, '_blank');
+                            clickedOnSentence = true;
+                        }
+                    }
+                    break;
+                }
+            }
+
+            // Only clear filters if clicking on empty space (not a sentence and not UI)
+            if (!isUIClick && !clickedOnSentence) {
+                clearAllFilters();
+            }
+        }
+
+        function showSentenceAtPoint(point, index) {
+            // Get keywords directly from the data point
+            const pointKeywords = Array.isArray(point.keyword) ? point.keyword : (point.keyword ? [point.keyword] : []);
+            
+            // Count keyword occurrences
+            const keywordCounts = {};
+            pointKeywords.forEach(kw => {
+                keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
+            });
+            
+            // Display keywords with counts (only show count if > 1)
+            let keywordsHtml = '';
+            if (Object.keys(keywordCounts).length > 0) {
+                const keywordEntries = Object.entries(keywordCounts).sort((a, b) => b[1] - a[1]);
+                keywordsHtml = `<div style="font-size: 10px; margin: 4px 0; line-height: 1.6; max-height: 150px; overflow-y: auto;">
+                    ${keywordEntries.map(([kw, count]) => 
+                        `<div style="padding: 2px 0;">• ${kw}${count > 1 ? ` (${count})` : ''}</div>`
+                    ).join('')}
+                </div>`;
+            }
+            
+            sentenceDisplay.innerHTML = `
+                <div class="sentence">"${point.sentence}"</div>
+                <div style="font-size: 9px; margin: 8px 0; color: #666; border-top: 1px solid #ddd; padding-top: 6px;"><strong>Keywords (${Object.keys(keywordCounts).length}):</strong></div>
+                ${keywordsHtml || '<div style="font-size: 10px; color: #999;">No keywords</div>'}
+            `;
+            sentenceDisplay.classList.add('visible');
+        }
+
+        // Hide sentence display on mouse leave
+        document.addEventListener('mouseleave', () => {
+            sentenceDisplay.classList.remove('visible');
+            if (isDrawing) {
+                isDrawing = false;  // Stop drawing if leaving window
+                if (doodlePoints.length > 2) {
+                    createDoodleStroke(doodlePoints);
+                }
+                doodlePoints = [];
+            }
+        });
+
+        function onMouseMoveDraw(event) {
+            if (drawingMode) {
+                // Get 3D position from mouse
+                mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+                // Project a ray from camera through mouse position
+                raycaster.setFromCamera(mouse, camera);
+                
+                // Check for sentence intersections (use the textSprites array directly)
+                const intersects = raycaster.intersectObjects(textSprites, false);
+                
+                // Reset previously hovered sentence to original color
+                if (hoveredSentencePoint && hoveredSentencePoint.material) {
+                    hoveredSentencePoint.material.color.copy(hoveredSentencePoint.originalColor);
+                }
+                hoveredSentencePoint = null;
+                hoveredSentencePosition = null;
+                
+                // Find and highlight the closest sentence
+                if (intersects.length > 0) {
+                    const obj = intersects[0].object;
+                    if (obj && obj.material) {
+                        hoveredSentencePoint = obj;
+                        hoveredSentencePosition = obj.position.clone();
+                        // Change color to black (0, 0, 0)
+                        hoveredSentencePoint.material.color.setHex(0x000000);
+                    }
+                }
+                
+                // Only update drawing line if actively dragging (mouse button pressed)
+                if (isDrawing && isMouseDown) {
+                    // Get position - use hovered sentence if available, otherwise use raycaster
+                    let point;
+                    if (hoveredSentencePosition) {
+                        point = hoveredSentencePosition.clone();
+                    } else {
+                        const direction = raycaster.ray.direction;
+                        const distance = 50;  // Distance from camera
+                        point = raycaster.ray.origin.clone().add(direction.multiplyScalar(distance));
+                    }
+                    
+                    doodlePoints.push(point.clone());
+                    
+                    // Update the line in real-time
+                    if (currentDoodleLine) {
+                        scene.remove(currentDoodleLine);
+                    }
+                    
+                    // Create new line with current points
+                    const geometry = new THREE.BufferGeometry();
+                    const posArray = [];
+                    doodlePoints.forEach(p => {
+                        posArray.push(p.x, p.y, p.z);
+                    });
+                    
+                    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(posArray), 3));
+                    
+                    const material = new THREE.LineBasicMaterial({
+                        color: 0xFF6600,  // Orange while drawing
+                        linewidth: 3,
+                        transparent: true,
+                        opacity: 0.9
+                    });
+                    
+                    currentDoodleLine = new THREE.Line(geometry, material);
+                    scene.add(currentDoodleLine);
+                }
+            }
+        }
+
+        function createDoodleStroke(points) {
+            if (points.length < 2) return;
+
+            // Create line with small segments for doodle effect
+            const geometry = new THREE.BufferGeometry();
+            const posArray = [];
+            
+            points.forEach(p => {
+                posArray.push(p.x, p.y, p.z);
+            });
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(posArray), 3));
+            
+            const material = new THREE.LineBasicMaterial({
+                color: 0x333333,
+                linewidth: 3,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            connectionLines.push(line);
+            
+            const doodle = {
+                line: line,
+                points: points,
+                textLabel: null
+            };
+            userConnections.push(doodle);
+            
+            console.log(`✏️ Doodle created with ${points.length} points`);
+            
+            // Prompt for label
+            setTimeout(() => {
+                const textContent = prompt('Add label to this doodle (optional):');
+                if (textContent && textContent.trim()) {
+                    // Place label at midpoint
+                    const midIndex = Math.floor(points.length / 2);
+                    const midpoint = points[midIndex];
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = 512;
+                    canvas.height = 128;
+                    
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.fillStyle = '#000000';
+                    context.font = 'Bold 32px Arial';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    context.fillText(textContent, 256, 64);
+                    
+                    const texture = new THREE.CanvasTexture(canvas);
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.minFilter = THREE.LinearFilter;
+                    
+                    const textMaterial = new THREE.SpriteMaterial({ map: texture });
+                    const textSprite = new THREE.Sprite(textMaterial);
+                    textSprite.position.copy(midpoint);
+                    textSprite.scale.set(4, 1, 1);
+                    
+                    scene.add(textSprite);
+                    userTextLabels.push(textSprite);
+                    doodle.textLabel = textSprite;
+                    
+                    console.log(`📝 Label added to doodle: "${textContent}"`);
+                }
+            }, 100);
+        }
+
+        function createSmoothCurve(startPos, endPos) {
+            // Create a smooth straight line between two points (shortest path)
+            const geometry = new THREE.BufferGeometry();
+            const posArray = [
+                startPos.x, startPos.y, startPos.z,
+                endPos.x, endPos.y, endPos.z
+            ];
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(posArray), 3));
+            
+            const material = new THREE.LineBasicMaterial({
+                color: 0x333333,
+                linewidth: 3,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+            connectionLines.push(line);
+            
+            const curve = {
+                line: line,
+                startPos: startPos,
+                endPos: endPos,
+                textLabel: null
+            };
+            userConnections.push(curve);
+            
+            console.log(`✏️ Curve created between two points`);
+            
+            // Prompt for label
+            setTimeout(() => {
+                const textContent = prompt('Add label to this connection (optional):');
+                if (textContent && textContent.trim()) {
+                    // Place label at midpoint
+                    const midpoint = new THREE.Vector3(
+                        (startPos.x + endPos.x) / 2,
+                        (startPos.y + endPos.y) / 2,
+                        (startPos.z + endPos.z) / 2
+                    );
+                    
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.width = 512;
+                    canvas.height = 128;
+                    
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.fillStyle = '#000000';
+                    context.font = 'Bold 32px Arial';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    context.fillText(textContent, 256, 64);
+                    
+                    const texture = new THREE.CanvasTexture(canvas);
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.minFilter = THREE.LinearFilter;
+                    
+                    const textMaterial = new THREE.SpriteMaterial({ map: texture });
+                    const textSprite = new THREE.Sprite(textMaterial);
+                    textSprite.position.copy(midpoint);
+                    textSprite.scale.set(4, 1, 1);
+                    
+                    scene.add(textSprite);
+                    userTextLabels.push(textSprite);
+                    curve.textLabel = textSprite;
+                    
+                    console.log(`📝 Label added to connection: "${textContent}"`);
+                }
+            }, 100);
+        }
+
+        // Hide sentence display on mouse leave
+        document.addEventListener('mouseleave', () => {
+            sentenceDisplay.classList.remove('visible');
+            // Reset hovered sentence color when leaving window
+            if (hoveredSentencePoint && hoveredSentencePoint.material) {
+                hoveredSentencePoint.material.color.copy(hoveredSentencePoint.originalColor);
+                hoveredSentencePoint = null;
+                hoveredSentencePosition = null;
+            }
+            if (isDrawing) {
+                isDrawing = false;  // Stop drawing if leaving window
+                if (drawingStartPos && doodlePoints.length > 0) {
+                    const endPos = doodlePoints[doodlePoints.length - 1];
+                    createSmoothCurve(drawingStartPos, endPos);
+                }
+                doodlePoints = [];
+                drawingStartPos = null;
+            }
+        });
+
+        // Drawing mode toggle with 'D' key
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'd') {
+                drawingMode = !drawingMode;
+                textMode = false;  // Turn off text mode
+                document.body.style.cursor = drawingMode ? 'crosshair' : 'default';
+                console.log(drawingMode ? '✏️ Drawing mode ON' : '✏️ Drawing mode OFF');
+                statsDiv.innerHTML += `<br>${drawingMode ? '✏️ DRAWING MODE' : ''}`;
+            }
+            // 'T' key to toggle text mode
+            if (e.key.toLowerCase() === 't') {
+                textMode = !textMode;
+                drawingMode = false;  // Turn off drawing mode
+                document.body.style.cursor = textMode ? 'text' : 'default';
+                console.log(textMode ? '📝 Text mode ON' : '📝 Text mode OFF');
+                statsDiv.innerHTML += `<br>${textMode ? '📝 TEXT MODE' : ''}`;
+            }
+            // 'C' key to clear all connections and text
+            if (e.key.toLowerCase() === 'c') {
+                userConnections.forEach(conn => scene.remove(conn.line));
+                userTextLabels.forEach(label => scene.remove(label));
+                userConnections = [];
+                connectionLines = [];
+                userTextLabels = [];
+                selectedConnectionPoints = [];
+                console.log('🗑️ All drawings cleared');
+            }
+        });
+
+        // ========================================================================
+        // UI Controls
+        // ========================================================================
+
+        // ========================================================================
+        // STEP 11: Animate
+        // ========================================================================
+        let hoverTimeout;
+        let lastStatsUpdate = 0;
+
+        function updateAxisLabelPositions() {
+            // Project axis endpoints to screen space
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const edgeThickness = 2;
+
+            // Helper function to find closest edge for a point
+            function findClosestEdge(x, y) {
+                const distToLeft = x;
+                const distToRight = viewportWidth - x;
+                const distToTop = y;
+                const distToBottom = viewportHeight - y;
+                const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+                
+                if (minDist === distToLeft) return 'left';
+                if (minDist === distToRight) return 'right';
+                if (minDist === distToTop) return 'top';
+                return 'bottom';
+            }
+
+            // Helper to get opposite edge
+            const opposites = { left: 'right', right: 'left', top: 'bottom', bottom: 'top' };
+
+            // Project both embedded and speculative points
+            const embeddedVector = axisEndpoints.z_embedded.clone();
+            embeddedVector.project(camera);
+            const embeddedX = (embeddedVector.x * 0.5 + 0.5) * viewportWidth;
+            const embeddedY = (-embeddedVector.y * 0.5 + 0.5) * viewportHeight;
+
+            const speculativeVector = axisEndpoints.z_speculative.clone();
+            speculativeVector.project(camera);
+            const speculativeX = (speculativeVector.x * 0.5 + 0.5) * viewportWidth;
+            const speculativeY = (-speculativeVector.y * 0.5 + 0.5) * viewportHeight;
+
+            // Find where each naturally points
+            let embeddedEdge = findClosestEdge(embeddedX, embeddedY);
+            let speculativeEdge = findClosestEdge(speculativeX, speculativeY);
+            
+            // If they point to same edge, force speculative to opposite
+            if (embeddedEdge === speculativeEdge) {
+                speculativeEdge = opposites[speculativeEdge];
+            }
+
+            // Position embedded
+            let embeddedFinalX, embeddedFinalY;
+            if (embeddedEdge === 'left') {
+                embeddedFinalX = edgeThickness;
+                embeddedFinalY = Math.max(0, Math.min(embeddedY, viewportHeight - 30));
+            } else if (embeddedEdge === 'right') {
+                embeddedFinalX = viewportWidth - 100;
+                embeddedFinalY = Math.max(0, Math.min(embeddedY, viewportHeight - 30));
+            } else if (embeddedEdge === 'top') {
+                embeddedFinalY = edgeThickness;
+                embeddedFinalX = Math.max(0, Math.min(embeddedX, viewportWidth - 100));
+            } else {
+                embeddedFinalY = viewportHeight - 30;
+                embeddedFinalX = Math.max(0, Math.min(embeddedX, viewportWidth - 100));
+            }
+
+            // Position speculative on opposite edge (using speculative's coordinates)
+            let speculativeFinalX, speculativeFinalY;
+            const speculativeSlowFactor = 1.0;  // Slow down speculative movement
+            if (speculativeEdge === 'left') {
+                speculativeFinalX = edgeThickness;
+                speculativeFinalY = Math.max(0, Math.min(speculativeY / speculativeSlowFactor, viewportHeight - 30));
+            } else if (speculativeEdge === 'right') {
+                speculativeFinalX = viewportWidth - 100;
+                speculativeFinalY = Math.max(0, Math.min(speculativeY / speculativeSlowFactor, viewportHeight -30));
+            } else if (speculativeEdge === 'top') {
+                speculativeFinalY = edgeThickness;
+                speculativeFinalX = Math.max(0, Math.min(speculativeX, viewportWidth - 100));
+            } else {
+                speculativeFinalY = viewportHeight - 30;
+                speculativeFinalX = Math.max(0, Math.min(speculativeX, viewportWidth - 100));
+            }
+
+            // Update positions
+            const embeddedLabel = document.getElementById('embedded-label');
+            if (embeddedLabel) {
+                embeddedLabel.style.left = embeddedFinalX + 'px';
+                embeddedLabel.style.top = embeddedFinalY + 'px';
+                embeddedLabel.style.right = 'auto';
+            }
+
+            const speculativeLabel = document.getElementById('speculative-label');
+            if (speculativeLabel) {
+                speculativeLabel.style.left = speculativeFinalX + 'px';
+                speculativeLabel.style.top = speculativeFinalY + 'px';
+                speculativeLabel.style.right = 'auto';
+            }
+
+            // Position other axis labels
+            function projectToEdge(worldPos, labelId) {
+                const vector = worldPos.clone();
+                vector.project(camera);
+                const x = (vector.x * 0.5 + 0.5) * viewportWidth;
+                const y = (-vector.y * 0.5 + 0.5) * viewportHeight;
+
+                const edge = findClosestEdge(x, y);
+                let finalX = x, finalY = y;
+
+                if (edge === 'left') {
+                    finalX = edgeThickness;
+                    finalY = Math.max(0, Math.min(y, viewportHeight - 30));
+                } else if (edge === 'right') {
+                    finalX = viewportWidth - 100;
+                    finalY = Math.max(0, Math.min(y, viewportHeight - 30));
+                } else if (edge === 'top') {
+                    finalY = edgeThickness;
+                    finalX = Math.max(0, Math.min(x, viewportWidth - 100));
+                } else {
+                    finalY = viewportHeight - 30;
+                    finalX = Math.max(0, Math.min(x, viewportWidth - 100));
+                }
+
+                const label = document.getElementById(labelId);
+                if (label) {
+                    label.style.left = finalX + 'px';
+                    label.style.top = finalY + 'px';
+                    label.style.right = 'auto';
+                }
+            }
+
+            projectToEdge(axisEndpoints.x, 'axis-x-label');
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+            
+            // Update axis label positions based on camera view
+            updateAxisLabelPositions();
+
+            // Hide labels after delay if not hovering
+            if (!mouse.isHovering) {
+                // Labels are always shown when applicable
+            }
+
+            // Update stats only every 500ms to avoid performance issues
+            const now = Date.now();
+            if (now - lastStatsUpdate > 500) {
+                lastStatsUpdate = now;
+                const cameraPos = camera.position;
+                const filteredCount = filteredIndices.size;
+                statsDiv.innerHTML = `
+                    Camera: (${cameraPos.x.toFixed(1)}, ${cameraPos.y.toFixed(1)}, ${cameraPos.z.toFixed(1)})<br>
+                    Points: ${data.length}${filteredCount > 0 ? ` (${filteredCount} filtered)` : ''}
+                `;
+
+                // Save camera position to sessionStorage periodically
+                sessionStorage.setItem('cameraPos', JSON.stringify({
+                    x: camera.position.x,
+                    y: camera.position.y,
+                    z: camera.position.z
+                }));
+                sessionStorage.setItem('controlsTarget', JSON.stringify({
+                    x: controls.target.x,
+                    y: controls.target.y,
+                    z: controls.target.z
+                }));
+            }
+        }
+
+        // ========================================================================
+        // Handle window resize
+        // ========================================================================
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // ========================================================================
+        // Main execution
+        // ========================================================================
+        async function main() {
+            try {
+                console.log('🚀 Initializing Critical Design UMAP 3D...');
+                
+                initScene();
+                console.log('✓ Scene initialized');
+                
+                const dataLoaded = await loadData();
+                console.log(`Data load result: ${dataLoaded}, data length: ${data.length}`);
+                
+                if (dataLoaded && data.length > 0) {
+                    console.log('Starting to create points...');
+                    createPoints();
+                    console.log('Points created, starting animation...');
+                    animate();
+                    loading.style.display = 'none';
+                    
+                    // Restore saved filters and camera position from sessionStorage
+                    const savedKeywords = sessionStorage.getItem('selectedKeywords');
+                    if (savedKeywords) {
+                        try {
+                            selectedKeywords = JSON.parse(savedKeywords);
+                            console.log('🔄 Restored filters:', selectedKeywords);
+                            
+                            // Update legend to show selected items
+                            document.querySelectorAll('.legend-item').forEach(item => {
+                                const keyword = item.textContent.trim();
+                                if (selectedKeywords[keyword]) {
+                                    item.classList.add('selected');
+                                }
+                            });
+                            
+                            applyKeywordFilters();
+                        } catch (e) {
+                            console.log('Could not restore filters');
+                        }
+                    }
+
+                    const savedCameraPos = sessionStorage.getItem('cameraPos');
+                    const savedControlsTarget = sessionStorage.getItem('controlsTarget');
+                    if (savedCameraPos && savedControlsTarget) {
+                        try {
+                            const pos = JSON.parse(savedCameraPos);
+                            const target = JSON.parse(savedControlsTarget);
+                            camera.position.set(pos.x, pos.y, pos.z);
+                            controls.target.set(target.x, target.y, target.z);
+                            controls.update();
+                            console.log('🔄 Restored camera position and view');
+                        } catch (e) {
+                            console.log('Could not restore camera position');
+                        }
+                    }
+                    
+                    // If we restored from sessionStorage, clear URL params to prevent override
+                    const hadSavedState = savedKeywords || (savedCameraPos && savedControlsTarget);
+                    if (hadSavedState) {
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }
+                    
+                    // Check for keywords in URL parameters
+                    const params = new URLSearchParams(window.location.search);
+                    const keywordParams = params.getAll('keyword');
+                    if (keywordParams.length > 0) {
+                        console.log('Keywords from URL:', keywordParams);
+                        setTimeout(() => {
+                            // Find points containing these keywords and zoom to them (without filtering)
+                            const pointsWithKeywords = data.filter(point => {
+                                const keywordArray = Array.isArray(point.keyword) ? point.keyword : [];
+                                return keywordParams.some(param => 
+                                    keywordArray.some(k => k.toLowerCase() === param.toLowerCase())
+                                );
+                            });
+                            
+                            if (pointsWithKeywords.length > 0) {
+                                console.log('Found ' + pointsWithKeywords.length + ' points with keywords');
+                                zoomToSpecificPoints(pointsWithKeywords, keywordParams);
+                            }
+                        }, 500);
+                    }
+                    
+                    console.log('✅ Ready!');
+                } else {
+                    loading.textContent = '❌ Failed to load data or data is empty';
+                    console.error('Data loading failed or data is empty');
+                }
+            } catch (error) {
+                console.error('Error in main:', error);
+                loading.textContent = `❌ Error: ${error.message}`;
+            }
+        }
+
+        // Zoom camera to specific points without filtering
+        function zoomToSpecificPoints(points, keywordParams) {
+            if (points.length === 0) {
+                console.log('No points to zoom to');
+                return;
+            }
+
+            // Find the point with the most keyword occurrences
+            let bestPoint = points[0];
+            let maxCount = 0;
+
+            points.forEach(point => {
+                const keywordArray = Array.isArray(point.keyword) ? point.keyword : [];
+                let count = 0;
+                
+                keywordParams.forEach(param => {
+                    count += keywordArray.filter(k => k.toLowerCase() === param.toLowerCase()).length;
+                });
+                
+                if (count > maxCount) {
+                    maxCount = count;
+                    bestPoint = point;
+                }
+            });
+
+            console.log('Best point found with ' + maxCount + ' keyword occurrences');
+
+            // Zoom very close to the best point
+            const x = bestPoint.x * 20;
+            const y = bestPoint.y * 20;
+            const z = bestPoint.z * 20;
+
+            // Extremely close zoom - right on top of the point
+            const distance = 2; // Extremely close
+            
+            // Position camera extremely close around the point
+            camera.position.set(
+                x + distance * 0.2,
+                y + distance * 0.2,
+                z + distance * 0.8
+            );
+
+            camera.lookAt(x, y, z);
+            
+            controls.target.set(x, y, z);
+            controls.autoRotate = false;
+            controls.update();
+            
+            console.log('Zoomed extremely close to best point with ' + maxCount + ' keywords');
+        }
+
+        // Zoom camera to fitted points based on current filter
+        function zoomToFilteredPoints() {
+            const visiblePoints = data.filter(d => d.visible !== false);
+            
+            if (visiblePoints.length === 0) {
+                console.log('No visible points to zoom to');
+                return;
+            }
+
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+            let minZ = Infinity, maxZ = -Infinity;
+
+            visiblePoints.forEach(d => {
+                const x = d.x * 20;
+                const y = d.y * 20;
+                const z = d.z * 20;
+                minX = Math.min(minX, x);
+                maxX = Math.max(maxX, x);
+                minY = Math.min(minY, y);
+                maxY = Math.max(maxY, y);
+                minZ = Math.min(minZ, z);
+                maxZ = Math.max(maxZ, z);
+            });
+
+            const centerX = (minX + maxX) / 2;
+            const centerY = (minY + maxY) / 2;
+            const centerZ = (minZ + maxZ) / 2;
+
+            const sizeX = maxX - minX;
+            const sizeY = maxY - minY;
+            const sizeZ = maxZ - minZ;
+            const maxSize = Math.max(sizeX, sizeY, sizeZ);
+
+            // Zoom camera to the filtered region
+            const distance = Math.max(maxSize / (2 * Math.tan((camera.fov / 2) * Math.PI / 180)), 50);
+            
+            camera.position.x = centerX + distance * 0.1;
+            camera.position.y = centerY + distance * 0.1;
+            camera.position.z = centerZ + distance * 0.5;
+
+            camera.lookAt(centerX, centerY, centerZ);
+            
+            controls.target.set(centerX, centerY, centerZ);
+            controls.update();
+            
+            console.log('Zoomed to filtered region:', { centerX, centerY, centerZ });
+        }
+
+        main();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,255 @@
+{
+  "description": "Master keyword to color mapping - diverse colors from 3D landscape",
+  "keywords": [
+    {
+      "keyword": "accountability",
+      "color": "#cd1818",
+      "group": "design"
+    },
+    {
+      "keyword": "agency",
+      "color": "#dd4e3a",
+      "group": "design"
+    },
+    {
+      "keyword": "alternative",
+      "color": "#e98261",
+      "group": "design"
+    },
+    {
+      "keyword": "artefact",
+      "color": "#c65b1e",
+      "group": "design"
+    },
+    {
+      "keyword": "care",
+      "color": "#db893d",
+      "group": "design"
+    },
+    {
+      "keyword": "collective",
+      "color": "#e8b362",
+      "group": "design"
+    },
+    {
+      "keyword": "community",
+      "color": "#c7981d",
+      "group": "design"
+    },
+    {
+      "keyword": "contextual",
+      "color": "#e2c636",
+      "group": "design"
+    },
+    {
+      "keyword": "critical",
+      "color": "#e6e164",
+      "group": "design"
+    },
+    {
+      "keyword": "critique",
+      "color": "#b9c61e",
+      "group": "design"
+    },
+    {
+      "keyword": "design fiction",
+      "color": "#c2e631",
+      "group": "design"
+    },
+    {
+      "keyword": "design_fiction",
+      "color": "#bfec5f",
+      "group": "design"
+    },
+    {
+      "keyword": "distributed",
+      "color": "#7dc91b",
+      "group": "design"
+    },
+    {
+      "keyword": "embedded",
+      "color": "#82e038",
+      "group": "design"
+    },
+    {
+      "keyword": "empowerment",
+      "color": "#8de961",
+      "group": "design"
+    },
+    {
+      "keyword": "ethics",
+      "color": "#41c421",
+      "group": "design"
+    },
+    {
+      "keyword": "everyday",
+      "color": "#45e038",
+      "group": "design"
+    },
+    {
+      "keyword": "friction",
+      "color": "#64e669",
+      "group": "design"
+    },
+    {
+      "keyword": "historical",
+      "color": "#1cc838",
+      "group": "design"
+    },
+    {
+      "keyword": "ideology",
+      "color": "#38e067",
+      "group": "design"
+    },
+    {
+      "keyword": "interrogate",
+      "color": "#61e998",
+      "group": "design"
+    },
+    {
+      "keyword": "justice",
+      "color": "#20c576",
+      "group": "design"
+    },
+    {
+      "keyword": "local",
+      "color": "#3bdca2",
+      "group": "design"
+    },
+    {
+      "keyword": "making",
+      "color": "#66e5c6",
+      "group": "design"
+    },
+    {
+      "keyword": "material",
+      "color": "#1ec6b2",
+      "group": "design"
+    },
+    {
+      "keyword": "participation",
+      "color": "#32e5e5",
+      "group": "design"
+    },
+    {
+      "keyword": "participatory",
+      "color": "#60daeb",
+      "group": "design"
+    },
+    {
+      "keyword": "positionality",
+      "color": "#19a1cc",
+      "group": "design"
+    },
+    {
+      "keyword": "post_critical",
+      "color": "#32a5e5",
+      "group": "design"
+    },
+    {
+      "keyword": "power",
+      "color": "#67a8e4",
+      "group": "design"
+    },
+    {
+      "keyword": "practice-based research",
+      "color": "#0d5ed7",
+      "group": "design"
+    },
+    {
+      "keyword": "practice_based_research",
+      "color": "#275ff1",
+      "group": "design"
+    },
+    {
+      "keyword": "problematize",
+      "color": "#6177ea",
+      "group": "design"
+    },
+    {
+      "keyword": "provocation",
+      "color": "#1b22c9",
+      "group": "design"
+    },
+    {
+      "keyword": "question",
+      "color": "#4538e0",
+      "group": "design"
+    },
+    {
+      "keyword": "reflexive",
+      "color": "#7e63e7",
+      "group": "design"
+    },
+    {
+      "keyword": "reframe",
+      "color": "#5520c5",
+      "group": "design"
+    },
+    {
+      "keyword": "research-through-design",
+      "color": "#8027f1",
+      "group": "design"
+    },
+    {
+      "keyword": "research_through_design",
+      "color": "#af57f4",
+      "group": "design"
+    },
+    {
+      "keyword": "responsibility",
+      "color": "#9318cd",
+      "group": "design"
+    },
+    {
+      "keyword": "scenario",
+      "color": "#be38e0",
+      "group": "design"
+    },
+    {
+      "keyword": "situated",
+      "color": "#dc64e6",
+      "group": "design"
+    },
+    {
+      "keyword": "speculation",
+      "color": "#c91bc2",
+      "group": "design"
+    },
+    {
+      "keyword": "speculative",
+      "color": "#e335c7",
+      "group": "design"
+    },
+    {
+      "keyword": "speculative design",
+      "color": "#ef5bc6",
+      "group": "design"
+    },
+    {
+      "keyword": "speculative futures",
+      "color": "#d31286",
+      "group": "design"
+    },
+    {
+      "keyword": "speculative_design",
+      "color": "#eb2d88",
+      "group": "design"
+    },
+    {
+      "keyword": "speculative_futures",
+      "color": "#f05a90",
+      "group": "design"
+    },
+    {
+      "keyword": "world-building",
+      "color": "#cd1843",
+      "group": "design"
+    },
+    {
+      "keyword": "world_building",
+      "color": "#e63147",
+      "group": "design"
+    }
+  ]
+}
