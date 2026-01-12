@@ -12,60 +12,43 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            color: #333;
+            font-family: Georgia, serif;
+            background: #fff;
+            color: #000;
             padding: 40px 20px;
-            line-height: 1.6;
+            line-height: 1.8;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 900px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            padding: 40px;
+            padding: 0;
         }
 
         h1 {
             text-align: center;
-            margin-bottom: 40px;
-            color: #2c3e50;
-            font-size: 2.5em;
+            margin-bottom: 50px;
+            font-size: 2em;
+            font-weight: normal;
         }
 
         .section {
-            margin-bottom: 50px;
+            margin-bottom: 60px;
         }
 
         .section-title {
-            font-size: 2em;
-            color: #34495e;
+            font-size: 1.4em;
             margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #000;
             cursor: pointer;
             user-select: none;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .section-title::before {
-            content: "▼";
-            font-size: 0.8em;
-            transition: transform 0.3s;
-        }
-
-        .section.collapsed .section-title::before {
-            transform: rotate(-90deg);
+            font-weight: normal;
         }
 
         .section-content {
-            display: grid;
-            gap: 30px;
-            max-height: 5000px;
+            display: block;
+            max-height: 100000px;
             overflow: hidden;
             transition: max-height 0.3s ease;
         }
@@ -76,113 +59,435 @@
         }
 
         .entry {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 8px;
-            border-left: 5px solid #3498db;
-            transition: all 0.3s;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
         }
 
-        .entry:hover {
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
-            transform: translateX(5px);
+        .entry:last-child {
+            border-bottom: none;
         }
 
         .entry-title {
-            font-size: 1.4em;
+            font-size: 1.1em;
             font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
 
-        .entry-link {
-            display: inline-block;
-            color: #3498db;
-            text-decoration: none;
-            font-size: 0.9em;
-            margin-bottom: 15px;
-        }
-
-        .entry-link:hover {
-            text-decoration: underline;
-        }
-
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tag {
-            display: inline-block;
-            background: #ecf0f1;
-            color: #34495e;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            border: 1px solid #bdc3c7;
-        }
-
-        .tag.critical {
-            background: #ffe0e0;
-            border-color: #e74c3c;
-            color: #c0392b;
-        }
-
-        .tag.speculative {
-            background: #e0f2f7;
-            border-color: #3498db;
-            color: #2980b9;
-        }
-
-        .tag.research {
-            background: #e8f8f5;
-            border-color: #16a085;
-            color: #117a65;
-        }
-
-        .entry-description {
-            color: #555;
-            line-height: 1.8;
+        .entry-location {
+            font-style: italic;
+            margin-bottom: 8px;
             font-size: 0.95em;
         }
 
-        .role {
-            font-style: italic;
-            color: #7f8c8d;
-            margin-bottom: 10px;
+        .entry-role {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .entry-tags {
+            margin-bottom: 12px;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .entry-link {
+            display: block;
+            margin-bottom: 8px;
             font-size: 0.9em;
         }
 
-        .location {
+        .entry-link a {
+            color: #0066cc;
+            text-decoration: underline;
+        }
+
+        .entry-link a:hover {
+            color: #000;
+        }
+
+        .entry-description {
+            color: #333;
+            font-size: 0.95em;
+            line-height: 1.8;
+        }
+
+        .entry-description strong {
             font-weight: bold;
-            color: #e74c3c;
-            margin-bottom: 15px;
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 20px;
+                padding: 0;
             }
 
             h1 {
-                font-size: 1.8em;
-            }
-
-            .section-title {
                 font-size: 1.5em;
             }
 
-            .entry {
-                padding: 15px;
+            .section-title {
+                font-size: 1.2em;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎨 Critical Design Research Graph</h1>
+        <h1>Critical Design Research Graph</h1>
+
+        <!-- NETHERLANDS STEP 1 SECTION -->
+        <div class="section">
+            <div class="section-title">Netherlands — Step 1: Online & Educational</div>
+            <div class="section-content">
+
+                <div class="entry">
+                    <div class="entry-location">Design Academy Eindhoven</div>
+                    <div class="entry-title">Anab Jain (Superflux)</div>
+                    <div class="entry-tags">critical, speculative, experiential, futurist</div>
+                    <div class="entry-description">
+                        <strong>Educator, Filmmaker, Researcher</strong><br>
+                        Invites members of the public to share hopes and dreams of a better future. Interrogates recurring questions through participatory futures projects using post-its. Explores shared responsibility as designers.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Design Academy Eindhoven</div>
+                    <div class="entry-title">Dan Eames</div>
+                    <div class="entry-tags">critical, research</div>
+                    <div class="entry-description">
+                        Contrasts UX design with critical design. Explores archives and crossovers between disconnected UX design and industry realities.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Design Academy Eindhoven</div>
+                    <div class="entry-title">Céline Park</div>
+                    <div class="entry-tags">speculative, critical</div>
+                    <div class="entry-description">
+                        Creates dystopian scenarios with utopian aesthetics. Addresses societal issues through investigations that blend diverse periods and multiple design & art tools. Fosters collaborations with experts across various fields. Encourages audiences to question cultural assumptions and uncover hidden narratives.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Design Academy Eindhoven</div>
+                    <div class="entry-title">Camila Kennedy</div>
+                    <div class="entry-tags">storytelling, representation</div>
+                    <div class="entry-description">
+                        Explains complex theory to broad public through storytelling. Takes new approaches to representation, breaking away from traditional diagrams. Integrates booming narration and quantum gravity physics concepts.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Design Academy Eindhoven</div>
+                    <div class="entry-title">Giulia Del Gobbo</div>
+                    <div class="entry-tags">interdisciplinary, performance</div>
+                    <div class="entry-description">
+                        Explores and reorients perception of embodied and cultural practices. Creates performative open-source spaces where visitors can interact. Connects geological and human time through interactive installations.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Design Academy Eindhoven</div>
+                    <div class="entry-title">Toni Wagner</div>
+                    <div class="entry-tags">research, feminist, storytelling</div>
+                    <div class="entry-description">
+                        <strong>Researcher, Learner, Feminist, Maker, Seamstress (MA Critical Design Research)</strong><br>
+                        Process-based approach to experience design with deep curiosity for humble everyday practices. Improves workflows and explores collaborative, tactile solutions. Actively translates relationships between critical theory and interdisciplinary practices to broad audiences.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Royal Academy of Art The Hague — Lectorate Design</div>
+                    <div class="entry-title">Gabriel A. Maher</div>
+                    <div class="entry-tags">critical, feminist, queer</div>
+                    <div class="entry-description">
+                        Uses critical and analytical approaches to design research through queer and feminist frameworks. Creates situations where research and design come together in performance. Explores pedagogic exchange and relationship between gender and identity in design.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Eindhoven University of Technology (TU/e)</div>
+                    <div class="entry-title">Tobias Revell</div>
+                    <div class="entry-tags">critical, feminist, AI</div>
+                    <div class="entry-description">
+                        <strong>Educator, Writer</strong><br>
+                        Questions the role of design in constructing dominant tech narratives of power, speed, efficiency, and consumption. Constructs future imaginaries of AI through design, proposing feminist, queer, sustainable, inclusive approaches. Develops tools and techniques to challenge mainstream assumptions.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Eindhoven University of Technology (TU/e)</div>
+                    <div class="entry-title">Gabriele Ferri</div>
+                    <div class="entry-tags">research, justice, ethics</div>
+                    <div class="entry-description">
+                        <strong>Lectorate: Design Justice and Transforming Practices</strong><br>
+                        Socially engaged design researcher investigating how injustice is perpetuated through design artifacts. Merges design critiques, ethnography, and speculative fabulation. Collaborates with communities to create equitable alternatives and address systemic challenges.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Eindhoven University of Technology (TU/e)</div>
+                    <div class="entry-title">Lenneke Kuijer</div>
+                    <div class="entry-tags">research, social practice</div>
+                    <div class="entry-description">
+                        Practices-oriented design researcher in human-computer interaction. Draws on social practice theories to understand impact of interactive technologies on everyday life. Uses research through design methodology studying domestic energy demand and social housing.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Eindhoven University of Technology (TU/e)</div>
+                    <div class="entry-title">Maria Luce Lupetti</div>
+                    <div class="entry-tags">AI, human-centered</div>
+                    <div class="entry-description">
+                        Explores methods to foster conscious and responsible approaches to meaningful human control over AI systems. Focuses on human-technology relationships.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Eindhoven University of Technology (TU/e)</div>
+                    <div class="entry-title">Chloé Rutzerveld</div>
+                    <div class="entry-tags">food design, participatory</div>
+                    <div class="entry-description">
+                        Explores and challenges interdisciplinary approaches combining design, science, and technology. Creates direct responses to things questioned or fascinated by through workshops and experimental dinners, making complex issues tangible for wide audiences.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-location">Eindhoven University of Technology (TU/e)</div>
+                    <div class="entry-title">Catrine Lallemand</div>
+                    <div class="entry-tags">speculative, interactive</div>
+                    <div class="entry-description">
+                        Creates interactive artifacts that support motivation and change using data as creative material. Explores aesthetics of friction and slow technology. Disseminates scientific research beyond academia through workshops and conferences.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CULTURAL INSTITUTIONS -->
+        <div class="section">
+            <div class="section-title">Cultural Institutions</div>
+            <div class="section-content">
+
+                <div class="entry">
+                    <div class="entry-title">MoMA</div>
+                    <div class="entry-tags">critical, speculative</div>
+                    <div class="entry-description">
+                        <strong>Definition of Critical Design:</strong> An attitude (not movement or method) that is speculative, conceptual, provocative, and darkly satirical. Poses incisive questions, challenges status quo, and produces long-term thinking with nuanced views of complex consumers and alternative solutions.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Het Nieuwe Instituut — Stacey Moran</div>
+                    <div class="entry-tags">feminist, research</div>
+                    <div class="entry-description">
+                        <strong>Focus:</strong> Feminist theory, technoscience, critical pedagogy<br>
+                        Investigates gender politics and boundaries between theory/practice. Uses methods from physical sciences to think about materiality of knowledge production.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Het Nieuwe Instituut — Florence Okoye</div>
+                    <div class="entry-tags">decolonizing, gender</div>
+                    <div class="entry-description">
+                        Uses iterative design and gender mainstreaming techniques to force designers to intentionally incorporate user perspectives within products.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Het Nieuwe Instituut — Garnet Hertz</div>
+                    <div class="entry-tags">critical, DIY</div>
+                    <div class="entry-description">
+                        Investigates DIY culture, electronic art, and critical design practices through art and research practices.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Het Nieuwe Instituut — Terraforma Lab</div>
+                    <div class="entry-tags">AI, smart cities</div>
+                    <div class="entry-description">
+                        Explores how machine learning can assist in making cities more liveable. Collaborates with public services and citizens. Investigates unexplored potential of IoT-driven precision farming.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Het Nieuwe Instituut — Maya Moumne</div>
+                    <div class="entry-tags">writing, feminist culture</div>
+                    <div class="entry-description">
+                        Actively engages in social and political discourse through literacy, visual, and sonic content. Focuses on representation and diversity.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Het Nieuwe Instituut — The Rodina</div>
+                    <div class="entry-tags">post-critical, experimental</div>
+                    <div class="entry-description">
+                        Post-critical design studio using strategies of performance art, play, and subversion. Creates experimental spaces between culture and technology, reimagining layered meanings across design surfaces.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Jan van Eyck — Irakli Sabekia</div>
+                    <div class="entry-tags">spatial justice, resistance</div>
+                    <div class="entry-description">
+                        Designer-researcher grounded in ritual and perseverance. Explores displacement, memory, and different dimensions of resistance.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Piet Zwart Institute — Experimental Publishing</div>
+                    <div class="entry-tags">research, interdisciplinary</div>
+                    <div class="entry-description">
+                        <strong>Master Course</strong> integrating reading, writing, prototyping, and documentation. Emphasizes artistic and self-directed research, multidisciplinary collaboration, and experimental publishing methods to empower collective thinking.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- INTERVIEWS -->
+        <div class="section">
+            <div class="section-title">Key Interviews & Perspectives</div>
+            <div class="section-content">
+
+                <div class="entry">
+                    <div class="entry-title">Afonso de Matos</div>
+                    <div class="entry-tags">pedagogical, critical</div>
+                    <div class="entry-description">
+                        <strong>Key Ideas:</strong> Critical design requires reflexivity and deconstruction. Warns against overestimating power of art and creating unnecessary distance. Advocates for honest, transparent engagement rather than evangelical approaches to design education.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Gijs de Boer</div>
+                    <div class="entry-tags">research, methodology</div>
+                    <div class="entry-description">
+                        Research methodology helps understand through artistic research grounded in own experience. Addresses audiences of experts in artistic research and philosophy. Warns against creating distance or hypocrisy through overly critical stances.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Patricia Reed — Post-Critical Perspective</div>
+                    <div class="entry-tags">post-critical, theory</div>
+                    <div class="entry-description">
+                        <strong>Core Perspective:</strong> Critical design embedded in material, ideological diagnosis. Combines subjective positionality with historical records and scientific data. Views criticism as enabling agency to redefine problems and explore possibilities. Advocates for humility, learning to work across scales, and honest frameworks for understanding our time.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ACADEMIC PAPERS -->
+        <div class="section">
+            <div class="section-title">Academic Papers & Theoretical Frameworks</div>
+            <div class="section-content">
+
+                <div class="entry">
+                    <div class="entry-title">Critical Design Ethnography: Designing for Change (Barab et al.)</div>
+                    <div class="entry-tags">research, ethnography</div>
+                    <div class="entry-link"><a href="https://sashabarab.org/article/critical-design-ethnography-designing-for-change/" target="_blank">sashabarab.org</a></div>
+                    <div class="entry-description">
+                        Intersection of participatory action research, critical ethnography, and socially responsive instructional design. Emphasizes building trust, understanding community context, and collaborative development of structures that critique and facilitate transformation. Highlights tensions of social position, ownership, and intentionality.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Criticism and Function in Critical Design Practice (Matt Malpass)</div>
+                    <div class="entry-tags">critical, practice</div>
+                    <div class="entry-link"><a href="https://www.burg-halle.de/id-neuwerk/post-exit/wp-content/uploads/sites/55/2019/02/Malpass-Mat-2013-Between-Wit-an-reason_Defining-Associative-Sepeculative-and-Critical-Design-in-Practice.pdf" target="_blank">burg-halle.de</a></div>
+                    <div class="entry-description">
+                        Argues critical design blurs boundary between fine art and industrial design. Stresses role of designers as cultural critics, extending design beyond functionalist frameworks to explore symbolic, cultural, existential, and discursive dimensions.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Critical Design as Critique of Design Status Quo (David Casablanca)</div>
+                    <div class="entry-tags">critical, theory</div>
+                    <div class="entry-link"><a href="https://www.researchgate.net/publication/350856752_Critical_Design_as_Critique_of_the_Design_Status_Quo" target="_blank">researchgate.net</a></div>
+                    <div class="entry-description">
+                        Critical design functions as critique through act of making. Transforms work by exposing concealed meanings, revealing ideological veils, and challenging assumptions. Emphasizes contextual, historical awareness and ability to question established conventions.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Teaching Alternative Paradigms Through Critical Design (Kuijer & Robbins)</div>
+                    <div class="entry-tags">pedagogy, speculative</div>
+                    <div class="entry-link"><a href="https://pure.tue.nl/ws/portalfiles/portal/201644556/51_8.pdf" target="_blank">tue.nl</a></div>
+                    <div class="entry-description">
+                        Uses critical design to teach questioning of implicit paradigms. Introduces "Future Probing" method using role play and alternative solutions (oppositional and accelerational). Argues research products should materialize exaggerated articulation of alternative problem framings, creating stepping stones toward different design approaches.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- BOOKS & MANIFESTOS -->
+        <div class="section">
+            <div class="section-title">Books & Manifestos</div>
+            <div class="section-content">
+
+                <div class="entry">
+                    <div class="entry-title">Speculative Everything: Design, Fiction, and Social Dreaming (Dunne & Raby)</div>
+                    <div class="entry-tags">speculative, fiction</div>
+                    <div class="entry-description">
+                        Design as catalyst for social dreaming. Employs humor, provocation, and rhetoric to pose questions, inspire imagination, and suggest that change is always possible. Uses functional fictions and narratives of consumption to explore implications of present choices.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">How Can We Afford to Be Critical? (Afonso de Matos)</div>
+                    <div class="entry-tags">critical, activism</div>
+                    <div class="entry-description">
+                        Questions how design can act politically and afford criticality amid structural constraints. Discusses designer as author/researcher and necessity of conducting self-initiated projects. Addresses power structures within design industry and importance of personal identity integration.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DESIGNER WEBSITES -->
+        <div class="section">
+            <div class="section-title">Designer Websites & Approaches</div>
+            <div class="section-content">
+
+                <div class="entry">
+                    <div class="entry-title">Dunne & Raby — Speculative Design Pioneers</div>
+                    <div class="entry-tags">speculative, critical</div>
+                    <div class="entry-description">
+                        <strong>Attitude:</strong> Design as provocation to challenge narrow assumptions and preconceptions. Uses satire to create intellectual engagement. Creates dilemmas where viewers question reality vs. fiction, making their own interpretations. Borrows from art methods while remaining close to everyday experience. Disturbs to suggest everyday could be radically different.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Ramia Mazé — The Reader</div>
+                    <div class="entry-tags">theory, practice</div>
+                    <div class="entry-description">
+                        Frames problems and raises awareness through critical discourse. Addresses urgent social and political issues through social design, design activism, and design fiction.
+                    </div>
+                </div>
+
+                <div class="entry">
+                    <div class="entry-title">Silvio Lorusso — Ontological Design</div>
+                    <div class="entry-tags">philosophy, critical</div>
+                    <div class="entry-description">
+                        Critiques myth of autonomy and self-determination. Proposes that the world we design, designs us back (ontological design). Emphasizes mutual agency between designer and designed world.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.querySelectorAll('.section-title').forEach(title => {
+            title.addEventListener('click', function() {
+                this.parentElement.classList.toggle('collapsed');
+            });
+        });
+    </script>
+</body>
+</html>
 
         <!-- NETHERLANDS STEP 1 SECTION -->
         <div class="section">
