@@ -415,7 +415,7 @@
             try {
                 // Load all data from single consolidated file
                 console.log('⚡ Loading landscape data...');
-                const response = await fetch('./data/landscape_all_data.json');
+                const response = await fetch('../data/landscape_all_data.json');
                 if (!response.ok) throw new Error(`Failed to load landscape_all_data.json: ${response.status}`);
                 const allData = await response.json();
                 const landscapeMetadata = allData.metadata;

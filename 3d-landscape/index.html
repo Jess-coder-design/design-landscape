@@ -47,6 +47,7 @@
             z-index: 100;
             font-size: 13px;
             line-height: 1.6;
+            display: none;
         }
 
         #info-panel h2 {
@@ -64,8 +65,6 @@
 
         #sentence-display {
             position: fixed;
-            bottom: 20px;
-            left: 20px;
             background: white;
             border: 1.5px solid #666;
             padding: 12px;
@@ -75,6 +74,8 @@
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             font-size: 11px;
+            left: 0;
+            top: 0;
         }
 
         #sentence-display .sentence {
@@ -164,6 +165,7 @@
             z-index: 100;
             font-size: 11px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: none;
         }
 
         #controls h3 {
@@ -196,15 +198,67 @@
         #legend {
             position: fixed;
             top: 20px;
-            right: 20px;
+            right: 0;
             background: white;
-            border: 1.5px solid #666;
+            border: 1.5px solid #333;
+            border-radius: 4px 0 0 4px;
             padding: 12px;
-            border-radius: 4px;
+            padding-right: 40px;
             z-index: 100;
             font-size: 11px;
-            max-width: 250px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 40px;
+            height: 30vh;
+            box-shadow: -2px 2px 8px rgba(0,0,0,0.2);
+            transition: width 0.3s ease;
+            overflow: hidden;
+        }
+
+        #legend.expanded {
+            width: 230px;
+        }
+
+        #legend-toggle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            background: transparent;
+            border: none;
+            z-index: 101;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            user-select: none;
+            transform: rotate(-90deg) translate(-50%, -50%);
+            white-space: nowrap;
+        }
+        #legend.expanded #legend-toggle {
+            left: auto;
+            right: 5px;
+            top: 10px;
+            transform: rotate(-90deg);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 6px 0;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 3px;
+            transition: all 0.2s ease;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        .legend-item:hover {
+            background: rgba(255, 102, 0, 0.1);
+        }
+
+        .legend-item.selected {
+            background: rgba(255, 102, 0, 0.3);
+            border: 1px solid #FF6600;
+            font-weight: bold;
         }
 
         #legend h3 {
@@ -312,13 +366,14 @@
             font-size: 11px;
             color: #ccc;
             font-family: monospace;
+            display: none;
         }
 
         #crit-logo {
             position: fixed;
             top: 25px;
             left: 25px;
-            font-size: 18px;
+            font-size: 21px;
             font-weight: bold;
             color: #333;
             z-index: 100;
@@ -357,7 +412,6 @@
     <div id="loading">Loading the landscape for you...</div>
     
     <div id="crit-logo">CR!T</div>
-    <div id="about-btn">?</div>
     
     <!-- Central sentence display -->
     <div id="sentence-center">
@@ -365,14 +419,16 @@
         <div class="metadata" id="center-metadata"></div>
     </div>
     <div id="legend">
-        <h3>Words used</h3>
-        <div id="legend-items" style="max-height: 300px; overflow-y: auto; font-size: 11px;"></div>
-        <div style="margin-top: 12px; font-size: 10px; color: #999;">
-            Click keywords to filter • Click multiple to combine
-        </div>
-        <div id="active-filters" style="margin-top: 12px; padding: 8px; background: rgba(255,102,0,0.1); border-radius: 4px; min-height: 30px; border: 1px solid #FF6600;">
-            <div style="font-size: 10px; color: #999; font-weight: bold;">Active Filters:</div>
-            <div id="filter-list" style="margin-top: 6px; font-size: 10px;"></div>
+        <div id="legend-toggle">Words Used</div>
+        <div id="legend-content" style="display: none;">
+            <div id="legend-items" style="margin-top: 0; max-height: 150px; overflow-y: auto; overflow-x: hidden; font-size: 11px;"></div>
+            <div style="margin-top: 12px; font-size: 10px; color: #999;">
+                Click keywords to filter • Click multiple to combine
+            </div>
+            <div id="active-filters" style="margin-top: 12px; padding: 8px; background: transparent; border-radius: 4px; min-height: 30px; border: 1px solid #ccc;">
+                <div style="font-size: 10px; color: #999; font-weight: bold;">Active Filters:</div>
+                <div id="filter-list" style="margin-top: 6px; font-size: 10px;"></div>
+            </div>
         </div>
     </div>
 
@@ -392,9 +448,9 @@
     <div id="controls">
         <div style="margin-top: 0px; padding-top: 0px; border-top: none; font-size: 10px; color: #666;">
             <strong>3D Navigation:</strong><br>
-            Click + drag: Rotate<br>
+            Right-click + drag: Rotate<br>
             Scroll: Zoom<br>
-            Right-click + drag: Pan<br>
+            Left-click + drag: Pan<br>
             <br>
             <strong style="color: #FF6600;">Drawing Tools:</strong><br>
             <strong>D</strong>: Toggle drawing mode<br>
@@ -437,6 +493,21 @@
         const centerMetadata = document.getElementById('center-metadata');
         const statsDiv = document.getElementById('stats');
 
+        // Panel control elements
+        const legendPanel = document.getElementById('legend');
+        const legendToggle = document.getElementById('legend-toggle');
+        const legendContent = document.getElementById('legend-content');
+
+        // Panel toggle functionality
+        legendToggle.addEventListener('click', () => {
+            legendPanel.classList.toggle('expanded');
+            if (legendPanel.classList.contains('expanded')) {
+                legendContent.style.display = 'block';
+            } else {
+                legendContent.style.display = 'none';
+            }
+        });
+
         let scene, camera, renderer, controls;
         let pointsMesh;
         let data = [];
@@ -476,6 +547,13 @@
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
             controls.autoRotate = false;
+            
+            // Swap mouse buttons: right-click to rotate, left-click to pan
+            controls.mouseButtons = {
+                LEFT: THREE.MOUSE.PAN,
+                MIDDLE: THREE.MOUSE.DOLLY,
+                RIGHT: THREE.MOUSE.ROTATE
+            };
 
             // Enable right-click context menu
             renderer.domElement.addEventListener('contextmenu', (e) => {
@@ -819,7 +897,7 @@
             const activeFilters = Object.entries(selectedKeywords);
             
             if (activeFilters.length === 0) {
-                filterList.innerHTML = '<div style="color: #666;">None</div>';
+                filterList.innerHTML = '';
                 return;
             }
 
@@ -1048,16 +1126,36 @@
         // Mouse interaction (hover to show sentence)
         // ========================================================================
         let selectedPoint = null;
+        
+        // Track mouse movement to distinguish clicks from drags
+        let mouseDownPos = { x: 0, y: 0 };
+        let isDragging = false;
+        const dragThreshold = 5; // pixels
 
         window.addEventListener('mousemove', onMouseMove, false);
         window.addEventListener('click', onMouseClick, false);
         window.addEventListener('mousemove', onMouseMoveDraw, false);
+        
+        // Track mouse down position to detect dragging
         window.addEventListener('mousedown', (event) => {
+            mouseDownPos = { x: event.clientX, y: event.clientY };
+            isDragging = false;
+            
             if (drawingMode && isDrawing) {
                 isMouseDown = true;
                 doodlePoints = [];  // Reset points for this drag
             }
         });
+        
+        // Check if mouse moved significantly during drag
+        window.addEventListener('mousemove', (event) => {
+            const dx = event.clientX - mouseDownPos.x;
+            const dy = event.clientY - mouseDownPos.y;
+            if (Math.sqrt(dx * dx + dy * dy) > dragThreshold) {
+                isDragging = true;
+            }
+        });
+        
         window.addEventListener('mouseup', (event) => {
             if (drawingMode && isDrawing && isMouseDown) {
                 isMouseDown = false;
@@ -1092,12 +1190,47 @@
                 }
             }
 
-            if (visibleSprite) {
-                const index = visibleSprite.userData.index;
-                if (index !== undefined && data[index]) {
-                    const point = data[index];
-                    showSentenceAtPoint(point, index);
+            // Clear previous highlight
+            textSprites.forEach(sprite => {
+                if (sprite.material.color) {
+                    sprite.material.color.setHex(0xFFFFFF);
                 }
+                if (sprite.outlineSprite) {
+                    scene.remove(sprite.outlineSprite);
+                    sprite.outlineSprite = null;
+                }
+            });
+
+            if (visibleSprite) {
+                // Add blue color to text
+                visibleSprite.material.color.setHex(0x0066FF);
+                
+                // Calculate box size dynamically based on sprite scale
+                const boxWidth = 240;
+                const boxHeight = 30 + Math.max(0, visibleSprite.scale.y * 8);
+                const boxX = (256 - boxWidth) / 2;
+                const boxY = Math.max(2, (64 - boxHeight) / 2 - 3);
+                
+                // Create an orange outline with white fill
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+                ctx.strokeStyle = '#FF6600';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const material = new THREE.SpriteMaterial({ map: texture });
+                const outline = new THREE.Sprite(material);
+                outline.position.copy(visibleSprite.position);
+                outline.position.z -= 0.05;
+                outline.scale.copy(visibleSprite.scale);
+                
+                visibleSprite.outlineSprite = outline;
+                scene.add(outline);
             } else {
                 // No visible sprite found under cursor
                 mouse.isHovering = false;
@@ -1105,6 +1238,11 @@
         }
 
         function onMouseClick(event) {
+            // Ignore clicks that were actually drags (rotating/panning)
+            if (isDragging) {
+                return;
+            }
+            
             // Check if click is on a UI element (legend, controls, etc.)
             let target = event.target;
             const isUIClick = target.closest('#legend') || 
@@ -1243,12 +1381,31 @@
                 <div style="font-size: 9px; margin: 8px 0; color: #666; border-top: 1px solid #ddd; padding-top: 6px;"><strong>Keywords (${Object.keys(keywordCounts).length}):</strong></div>
                 ${keywordsHtml || '<div style="font-size: 10px; color: #999;">No keywords</div>'}
             `;
+            
+            // Position the box centered on the sentence point in the 3D landscape
+            const sprite = textSprites[index];
+            if (sprite) {
+                const screenPos = sprite.position.clone().project(camera);
+                const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+                
+                // Center the box on the sentence point
+                sentenceDisplay.style.left = (x - sentenceDisplay.offsetWidth / 2) + 'px';
+                sentenceDisplay.style.top = (y - sentenceDisplay.offsetHeight / 2) + 'px';
+            }
+            
             sentenceDisplay.classList.add('visible');
         }
 
         // Hide sentence display on mouse leave
         document.addEventListener('mouseleave', () => {
-            sentenceDisplay.classList.remove('visible');
+            // sentenceDisplay.classList.remove('visible');
+            // Clear highlight when leaving
+            textSprites.forEach(sprite => {
+                if (sprite.material.color) {
+                    sprite.material.color.setHex(0xFFFFFF);
+                }
+            });
             if (isDrawing) {
                 isDrawing = false;  // Stop drawing if leaving window
                 if (doodlePoints.length > 2) {
